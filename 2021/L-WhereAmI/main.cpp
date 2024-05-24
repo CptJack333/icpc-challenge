@@ -48,19 +48,27 @@ int main(){
         //按照category顺序排序
         sort(gridAtDist.begin(), gridAtDist.end(), [&](int a, int b){return gridCategory[a] < gridCategory[b];});
         for(int i=0,j=0; i < gridAtDist.size(); i=j){
-            for(; j < gridAtDist.size() && gridCategory[gridAtDist[j]] == gridCategory[gridAtDist[i]]; ++j);
+            for(j=i+1; j < gridAtDist.size(); ++j){
+                auto gridi=gridAtDist[i], gridj=gridAtDist[j];
+                auto categoryi=gridCategory[gridi], categoryj=gridCategory[gridj];
+                if(categoryi!=categoryj)
+                    break;
+            }
             int& sz=categorySize[gridCategory[gridAtDist[i]]];
-            //当前comp category的所有格子编码都是一样的,靠这个X无法区分
+            //当前comp category的所有格子编码都是一样的,靠这个X无法区分。包含category中只剩一个可以唯一区分的情况。
             if (j - i == sz)
                 continue;
             //当前X可以唯一区分一个格子，新建一类
             if (j - i == 1)
                 categorySteps[categorySize.size()] = dist;
             sz-=j-i;
-            if (sz == 1)
-                categorySteps[gridCategory[gridAtDist[i]]] = dist;//当前X的位置是.的格子只有一个,它可以被区分
+            if (sz == 1) {
+                auto category = gridCategory[gridAtDist[i]];
+                categorySteps[category] = dist;//当前X的位置是.的格子只有一个,它可以被区分
+            }
             //当前距离的category分裂开来，继续流程
-            for (int k = i; k < j; k++) gridCategory[gridAtDist[k]] = categorySize.size();
+            for (int k = i; k < j; k++)
+                gridCategory[gridAtDist[k]] = categorySize.size();
             categorySize.push_back(j - i);
         }
     }
