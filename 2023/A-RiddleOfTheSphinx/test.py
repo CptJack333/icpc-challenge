@@ -53,7 +53,7 @@ def vreadline(data: TextIO, verbose: bool) -> str:
     return line
 
 
-def answer_question(process: subprocess.Popen, la: int, lb: int, lc: int) -> None:
+def answer_question(process: subprocess.Popen, la: int, lb: int, lc: int, honest=True) -> None:
     """Read a question from the solution and provide the answer."""
     line = vreadline(process.stdout, True)
     if line == '':
@@ -67,7 +67,10 @@ def answer_question(process: subprocess.Popen, la: int, lb: int, lc: int) -> Non
         raise WrongAnswer('Question contains non-integer tokens')
     if any(not (0 <= q <= 10) for q in question):
         raise WrongAnswer('Invalid question value not between 0 and 10')
-    answer = question[0] * la + question[1] * lb + question[2] * lc
+    if honest:
+        answer = question[0] * la + question[1] * lb + question[2] * lc
+    else:
+        answer=random.randint(1,10000)
     vprint(str(answer), file=process.stdin, flush=True, verbose=True)
 
     
@@ -110,11 +113,7 @@ def main() -> int:
     try:
         fake=random.randint(0,4)
         for i in range(5):
-            if i==fake:
-                answer=random.randint(1,10000)
-                vprint(str(answer), file=process.stdin, flush=True, verbose=True)
-            else:
-                answer_question(process, args.la, args.lb, args.lc)
+            answer_question(process, args.la, args.lb, args.lc, honest=i!=fake)
         check_answer(process, args.la, args.lb, args.lc)
         check_done(process)
         print(f'OK! Program found the correct number of legs of all three creatures')

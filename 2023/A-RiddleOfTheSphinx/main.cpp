@@ -33,11 +33,11 @@ int main(){
         return 0;
     }
     //前面三个问题其中之一撒谎，则剩下四个等式成立，分别去验证
-    if(d-b-c+2*b+3*c==e)
+    if((d-b-c)+2*b+3*c==e)
         cout << a << " " << b << " " << c << endl;
-    else if(d-a-c+a+3*c==e)
+    else if(a+2*(d-a-c)+3*c==e)
         cout << a << " " << b << " " << c << endl;
-    else if(d-b-a+2*b+a==e)
+    else if(a+2*b+3*(d-b-a)==e)
         cout << a << " " << b << " " << c << endl;
     return 0;
 }
