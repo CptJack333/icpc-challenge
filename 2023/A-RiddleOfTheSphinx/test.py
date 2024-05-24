@@ -25,6 +25,7 @@ show examples for different languages::
 """
 
 import argparse
+import random
 import subprocess
 import sys
 from typing import TextIO
@@ -107,8 +108,13 @@ def main() -> int:
     process = subprocess.Popen(args.program, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                encoding='utf-8', errors='surrogateescape')
     try:
-        for _ in range(5):
-            answer_question(process, args.la, args.lb, args.lc)
+        fake=random.randint(0,4)
+        for i in range(5):
+            if i==fake:
+                answer=random.randint(1,10000)
+                vprint(str(answer), file=process.stdin, flush=True, verbose=True)
+            else:
+                answer_question(process, args.la, args.lb, args.lc)
         check_answer(process, args.la, args.lb, args.lc)
         check_done(process)
         print(f'OK! Program found the correct number of legs of all three creatures')
