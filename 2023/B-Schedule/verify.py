@@ -2,7 +2,6 @@
 
 import subprocess
 import sys
-import threading
 
 def execute_bash_command(command):
     result = subprocess.run("bash -c \""+command+"\"", shell=True, capture_output=True, text=True)
@@ -57,28 +56,11 @@ for f in files.split():
     # for i in range(len(out[1])):
     #     print(sched[i])
     # sched[1]=[1,1,1,1,1,1]
-    threadNum=32
-    threadResult=[True for i in range(threadNum)]
-    def calcThread(index):
-        for i in range(len(out[1])):
-            for j in range(i+1,len(out[1])):
-                if (i*len(out[1])+j)%threadNum!=index:
-                    continue
-                if not compatible(sched[i],sched[j]):
-                    threadResult[index]=False
-                    return
-    threads=[]
-    for i in range(threadNum):
-        t=threading.Thread(target=calcThread, args=(i,))
-        threads.append(t)
-        t.start()
-
-    for thread in threads:
-        thread.join ()
-
-    if threadResult!=[True for i in range(threadNum)]:
-        print("failed")
-        exit()
+    for i in range(len(out[1])):
+        for j in range(i+1,len(out[1])):
+            if not compatible(sched[i],sched[j]):
+                print("failed")
+                exit()
     # exit()
     # break
 print("succ")
