@@ -22,7 +22,7 @@ int main(){
     while(comb(k)<n)
         ++k;
     if(k>w) {
-        cout <<"inifinity"<<endl;
+        cout <<"infinity"<<endl;
         return 0;
     }
     vector<int> permu;
