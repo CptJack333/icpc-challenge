@@ -52,22 +52,17 @@ int main() {
             Point bmid{(b1 + b2) * 0.5 + bp * 0.5};
 //            ab四条边两两组合遍历
             for (int aDiag = 0; aDiag < 2; aDiag++) {
-//                将金字塔顶点旋转到平面上（向中心方向）
+//                将金字塔顶点旋转到平面上
                 Point at = aDiag ? a1 : (a1 + a2) * 0.5 + ap * (aAltLen / aSideLen);
                 double alen = aDiag ? aDiagLen : 0.0;
                 for (int bDiag = 0; bDiag < 2; bDiag++) {
+//                    bDiag=1,从塔尖沿着斜棱走到顶点 ；=0从塔尖走到边上
                     Point bt = bDiag ? b1 : (b1 + b2) * 0.5 + bp * (bAltLen / bSideLen);
                     double blen = bDiag ? bDiagLen : 0.0;
-//
-                    Point am1=a1+ap;
-//                    b1在a1a2的左边，b1在am1a1的左边
-                    if (!bDiag &&CrossProd(b1-a1,a2-a1) < 0&&CrossProd(b1-am1,a1-am1) < 0) continue;
-                    if (bDiag&&!Intersect(a1, a2, at, bt)) continue;
-//!aDiag bmid在直线a1a2的右边或上面
-//                    if (!aDiag && (CrossProd(b1 - a1, a2 - a1) < 0 || !Intersect(a1, a2, at, bt))) continue;
-                    if (!aDiag && (CrossProd(b1 - a1, a2 - a1) < 0 || !Intersect(a1, a2, at, bt))) continue;
+// 针对从a的塔尖走到a1a2上，然后走到b。
+// 第一个条件判断的是，如果走到a1a2的方向，不是向b塔靠近，就是白费力气即b塔应该在a1a2的右方，通过bmid判断
+//第二个条件判断路径应与a1a2相交
                     if (!aDiag && (CrossProd(bmid - a1, a2 - a1) < 0 || !Intersect(a1, a2, at, bt))) continue;
-                    if (!bDiag && (CrossProd(amid - b1, b2 - b1) < 0 || !Intersect(b1, b2, at, bt))) continue;
                     if (!bDiag && (CrossProd(amid - b1, b2 - b1) < 0 || !Intersect(b1, b2, at, bt))) continue;
                     ret = min(ret, alen + blen + (bt - at).len());
                 }
