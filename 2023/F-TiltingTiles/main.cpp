@@ -38,9 +38,9 @@ pair<int64_t, int64_t> match(const string& s, const string& t) {
 }
 
 int main() {
-    int Y, X;
-    cin >> Y >> X;
-    vector<vector<int>> g(Y, vector<int>(X)), g2 = g;
+    int h, w;
+    cin >> h >> w;
+    vector<vector<int>> g(h, vector<int>(w)), g2 = g;
     char ch;
     for (auto &row: g)
         for (auto &v: row) {
@@ -54,29 +54,30 @@ int main() {
         }
 
     for (int sd = 0; sd < 4; sd++)
-        for (int dd = 1; dd < 4; dd += 2) {
+        for (int dd = 1; dd < 4; dd += 2) {//4x2中间状态枚举
             auto tg = g;
-            for (int i = 0, d = sd; i <= 6; i++, d = (d + dd) % 4) {
+            for (int i = 0, d = sd; i <= 6; i++, d = (d + dd) % 4) {//0=left, 1=up, 2=right, 3=down
                 if (tg == g2)
                     goto pass;
                 if (i >= 2) {
                     auto ng = tg;
-                    for (int y = 0; y < Y; y++)
-                        for (int x = 0; x < X; x++) {
+                    for (int y = 0; y < h; y++)//检查外廓形状是否一致
+                        for (int x = 0; x < w; x++) {
                             if (!!g2[y][x] != !!ng[y][x])//整个grid里面的tiles的外廓形状不一致
                                 goto nomatch;
-                            if (ng[y][x])
-                                ng[y][x] = y * X + x + 1;
+                            if (ng[y][x])//给每个位置一个独立的数字编号
+                                ng[y][x] = y * w + x + 1;
                         }
-                    for (int j = 0; j < 4; j++)
+                    for (int j = 0; j < 4; j++)//沿着这一方向转动四次
                         tilt((d + j) % 4, ng);
                     vector<int64_t> residues, mods;
-                    for (int y = 0; y < Y; y++)
-                        for (int x = 0; x < X; x++)
+                    for (int y = 0; y < h; y++)
+                        for (int x = 0; x < w; x++)
                             if (ng[y][x]) {
-                                string s, t;
+                                string s, t;//找出 转动的变换路径
+                                //找出这个格子所属的变换路径
                                 for (int *ptr = &ng[y][x]; *ptr;) {
-                                    int x2 = (*ptr - 1) % X, y2 = (*ptr - 1) / X;
+                                    int x2 = (*ptr - 1) % w, y2 = (*ptr - 1) / w;
                                     *ptr = 0;
                                     s += tg[y2][x2];
                                     t += g2[y2][x2];
@@ -88,7 +89,7 @@ int main() {
                                     goto nomatch;
                                 if (mod == 1)
                                     continue;
-                                for (int i = 0; i < mods.size(); i++) {
+                                for (int i = 0; i < mods.size(); i++) {//验证线性同余方程组是否有解
                                     int64_t g = Gcd(mod, mods[i]);
                                     if (residues[i] % g != residue % g) goto nomatch;
                                 }

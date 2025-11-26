@@ -39,7 +39,7 @@ def move(board, direction):
         moved = False
         for r in rows:
             for c in cols:
-                if new_board[r][c] == 'o' or new_board[r][c].isdigit():  # 找到滑块
+                if new_board[r][c].isalpha() or new_board[r][c].isdigit():  # 找到滑块
                     chess=new_board[r][c]
                     nr, nc = r + dr, c + dc
                     # 检查是否可以移动
@@ -51,26 +51,71 @@ def move(board, direction):
 
 def main():
     # 初始棋盘示例：5x5，'#' 为障碍，'o' 为滑块，'.' 为空
-    board = [
-        ['.', '.', '.', '.', '.'],
-        ['.', '1', '.', '.', '.'],
-        ['.', '.', '.', '.', '2'],
-        ['.', '.', '.', '.', '.'],
-        ['3', '.', '.', '.', '.']
-    ]
+    # board = [
+    #     ['.', '.', '.', '.', '.'],
+    #     ['.', '1', '.', '.', '.'],
+    #     ['.', '.', '.', '.', '2'],
+    #     ['.', '.', '.', '.', '.'],
+    #     ['3', '.', '.', '.', '.']
+    # ]
+
+    stt='''
+.r..
+rgyb
+.b..
+.yr.
+'''
+    stt='''
+1...
+2...
+34..
+5678
+'''
+
+
+# .r..
+# rgyb
+# .b..
+# .yr.
+#
+# l d r u
+#
+# yrbr
+# ..yr
+# ...g
+# ...b
+
+
+    # 把stt转换成二维数组
+    board = [list(line.strip()) for line in stt.strip().split('\n')]
+
 
     print("初始棋盘:")
     print_board(board)
 
-    # 测试向右倾斜
-    board = move(board, 'right')
-    print("向右倾斜后:")
-    print_board(board)
+    while True:
+        cmd=input("diretcion:")
+        if cmd=="reset":
+            print('--------------------')
+            print('--------------------')
+            print('--------------------')
+            board = [list(line.strip()) for line in stt.strip().split('\n')]
+            print_board(board)
+            continue
+        m={"l":"left","r":"right","u":"up","d":"down"}
+        board=move(board,m[cmd])
+        print_board(board)
+        print('-------------------')
 
-    # 测试向下倾斜
-    board = move(board, 'down')
-    print("向下倾斜后:")
-    print_board(board)
+    # 测试向右倾斜
+    # board = move(board, 'right')
+    # print("向右倾斜后:")
+    # print_board(board)
+    #
+    # # 测试向下倾斜
+    # board = move(board, 'down')
+    # print("向下倾斜后:")
+    # print_board(board)
 
 if __name__ == "__main__":
     main()
