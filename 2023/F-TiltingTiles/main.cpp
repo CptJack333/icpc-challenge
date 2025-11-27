@@ -17,7 +17,7 @@ void tilt(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
     };
     for (int y = 0; y < Y; y++) {
         int x2 = 0;
-        for (int x = 0; x < X; x++) if (*get(x, y)) {
+        for (int x = 0; x < X; x++) if (*get(x, y)) {//妙喔，艹
                 *get(x2++, y) = *get(x, y);
             }
         for (; x2 < X; x2++) *get(x2, y) = 0;
