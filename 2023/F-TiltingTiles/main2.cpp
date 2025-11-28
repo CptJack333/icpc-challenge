@@ -19,23 +19,12 @@ void tilt(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
 }
 
 enum direction{left, right,up,down};
-//void tilt(direction dir, vector<vector<char>>& g) {
-//
-//    for(auto y=0;y<h;++y) {
-//        int cnt = 0;
-//        for (auto x = 0; x < w; ++x)
-//            if (g[y][x])
-//                g[y][cnt] = g[y][x];
-//        for(int c=0;c<cnt;++c)
-//            g[y][cnt+c]=0;
-//
-//    }
-//}
-
+map<direction,int> dmap={{::left, 0},{::right,2},{up,1},{down,3}};
+map<direction,direction> notd={{::left, ::right},{::right,::left},{up,down},{down,up}};
 
 int main(){
     cin>>h>>w;
-    vector<vector<char>> g1(h, vector<char>(w)),g2(h, vector<char>(w));
+    vector<vector<int>> g1(h, vector<int>(w)),g2(h, vector<int>(w));
     char ch;
     for (auto &row: g1)
         for (auto &v: row) {
@@ -49,6 +38,55 @@ int main(){
             if (ch != '.')
                 v = ch - 'a' + 1;
         }
-    for
+    set<direction> dset={::left,::right};
+    for(auto d :dset){
+        auto tg1=g1;
+        tilt(dmap[d],tg1);
+        if (tg1==g2)
+            goto can_match;
+
+        for(auto d2:dset){
+            if(d==d2||notd[d]==d2)continue;
+            tilt(dmap[d2],tg1);
+            if (tg1==g2)
+                goto can_match;
+
+            for(int i=0;i<h;i++)
+                for(int j=0;j<w;j++)
+                    if ((!!tg1[i][j])!=(!!g2[i][j]))
+                        goto pppp;
+
+            //获取转换路径
+            vector<direction> vd={notd[d],notd[d2],d,d2};
+            auto tg2=tg1;
+            auto cnt=0;
+            for(int i=0;i<h;i++)
+                for(int j=0;j<w;j++)
+                    if(tg1[i][j]!=0)
+                        tg2[i][j]=++cnt;
+            auto tg3=tg2;
+            for(auto d :vd){
+                tilt(dmap[d],tg3);
+            }
+            map<int,int> lmap;//转了一圈的路径映射
+            for(int k=1;k<=cnt;++k){
+                for(int i=0;i<h;i++)
+                    for (int j = 0; j < w; j++) {
+                        if (tg3[i][j] == k)
+                            lmap[k] = tg2[i][j];
+                        goto kkk;
+                    }
+                kkk:
+                int a=1;
+            }
+            //已经得到了路径,然后要判断g1和g2的对应位置,看看这个转换有没有可能得到
+            //找出始末图的字符串，然后看看这两个字符串是不是可以通过旋转得到的
+        }
+        pppp:
+
+    }
+
+can_match:
+    cout<<"yes"<<endl;
 
 }
