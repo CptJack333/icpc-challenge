@@ -24,12 +24,47 @@ void tilt(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
     }
 }
 
+void tilt2(int direction,vector<vector<int>>& board) {//dir: 0=left, 1=up, 2=right, 3=down
+    int dr, dc;
+    auto h=board.size(),w=board[0].size();
+    if (direction == 1) {
+        dr = -1; dc = 0;
+    }
+    else if (direction == 3) {
+        dr = 1; dc = 0;
+    }
+    else if (direction == 0) {
+        dr = 0; dc = -1;
+    }
+    else if (direction == 2) {
+        dr = 0; dc = 1;
+    }
+
+    bool moved = true;
+    while (moved) {  // 多次扫描直到所有滑块都停止
+        moved = false;
+        for (int r=0;r<h;++r)
+            for (int c=0;c<w;++c)
+                if (board[r][c]) {  // 找到滑块
+                    auto chess = board[r][c];
+                    int nr = r + dr, nc = c + dc;
+                    // 检查是否可以移动
+                    if (nr >= 0 && nr < h && nc >= 0 && nc < w && board[nr][nc] == 0) {
+                        board[nr][nc] = chess;
+                        board[r][c] = 0;
+                        moved = true;
+                    }
+                }
+    }
+
+}
+
 pair<int64_t, int64_t> match(const string& s, const string& t) {
     // Who needs hashing/string algorithms?
     int64_t r, m;
     for (r = 0; r <= s.size(); r++) {
         if (r == s.size()) return {0, 0};
-        if (memcmp(&s[r], &t[0], s.size()-r) == 0 && memcmp(&s[0], &t[s.size()-r], r) == 0) break;
+        if (memcmp(&s[r], &t[0], s.size()-r) == 0 && memcmp(&s[0], &t[s.size()-r], r) == 0) break;//找字符串能对上的位置
     }
     for (m = r ? r : 1; m < s.size(); m++) {
         if (s.size() % m == 0 && memcmp(&s[0], &s[m], s.size()-m) == 0) break;
