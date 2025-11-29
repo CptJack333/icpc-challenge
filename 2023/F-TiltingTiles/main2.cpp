@@ -98,7 +98,10 @@ int main(){
             if (ch != '.')
                 v = ch - 'a' + 1;
         }
-    set<direction> dset={::left,::right};
+
+    set<direction> dset={::left,::right,up,down};
+    if (g1==g2)
+        goto can_match;
     for(auto d :dset){
         auto tg1=g1;
         tilt(dmap[d],tg1);
@@ -111,10 +114,16 @@ int main(){
             if (tg1 == g2)
                 goto can_match;
 
+            bool same_outline=true;
             for (int i = 0; i < h; i++)
                 for (int j = 0; j < w; j++)
                     if ((!!tg1[i][j]) != (!!g2[i][j]))//轮廓不一样
-                        continue;
+                    {
+                        same_outline=false;
+                        goto end_loop;
+                    }
+            end_loop:
+            if(!same_outline)continue;
 
             //获取转换路径
             vector<direction> vd = {notd[d], notd[d2], d, d2};
@@ -135,11 +144,11 @@ int main(){
             map<int, int> lmap;//转了一圈的路径映射
             for (int k = 1; k <= cnt; ++k) {
                 for (int i = 0; i < h; i++)
-                    for (int j = 0; j < w; j++) {
-                        if (tg3[i][j] == k)
+                    for (int j = 0; j < w; j++)
+                        if (tg3[i][j] == k) {
                             lmap[k] = tg2[i][j];
-                        goto double_break;
-                    }
+                            goto double_break;
+                        }
                 double_break:
                 int a = 1;
             }
@@ -157,6 +166,7 @@ int main(){
                 auto b = lmap[a];
                 while (b != a) {
                     chain.push_back(b);
+                    num_set.erase(b);
                     b = lmap[b];
                 }
                 index_chain.push_back(chain);
