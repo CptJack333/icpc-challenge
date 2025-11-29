@@ -22,6 +22,41 @@ enum direction{left, right,up,down};
 map<direction,int> dmap={{::left, 0},{::right,2},{up,1},{down,3}};
 map<direction,direction> notd={{::left, ::right},{::right,::left},{up,down},{down,up}};
 
+void tilt2(int direction,vector<vector<int>>& board) {//dir: 0=left, 1=up, 2=right, 3=down
+    int dr, dc;
+    auto h=board.size(),w=board[0].size();
+    if (direction == up) {
+        dr = -1; dc = 0;
+    }
+    else if (direction == down) {
+        dr = 1; dc = 0;
+    }
+    else if (direction == ::left) {
+        dr = 0; dc = -1;
+    }
+    else if (direction == ::right) {
+        dr = 0; dc = 1;
+    }
+
+    bool moved = true;
+    while (moved) {  // 多次扫描直到所有滑块都停止
+        moved = false;
+        for (int r=0;r<h;++r)
+            for (int c=0;c<w;++c)
+                if (board[r][c]) {  // 找到滑块
+                    auto chess = board[r][c];
+                    int nr = r + dr, nc = c + dc;
+                    // 检查是否可以移动
+                    if (nr >= 0 && nr < h && nc >= 0 && nc < w && board[nr][nc] == 0) {
+                        board[nr][nc] = chess;
+                        board[r][c] = 0;
+                        moved = true;
+                    }
+                }
+    }
+
+}
+
 bool contain(vector<int> a,vector<int>b) {
     if (b.empty()) return true;
     if (b.size() > a.size()) return false;
@@ -103,9 +138,9 @@ int main(){
                     for (int j = 0; j < w; j++) {
                         if (tg3[i][j] == k)
                             lmap[k] = tg2[i][j];
-                        goto kkk;
+                        goto double_break;
                     }
-                kkk:
+                double_break:
                 int a = 1;
             }
             //已经得到了路径,然后要判断g1和g2的对应位置,看看这个转换有没有可能得到
@@ -138,8 +173,6 @@ int main(){
             //判断S2有没有可能由S1旋转得来
             if(is_rotation(s1,s2))
                 goto can_match;
-            else
-                goto no_match;
         }
     }
 
