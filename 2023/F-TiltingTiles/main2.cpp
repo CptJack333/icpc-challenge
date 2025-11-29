@@ -22,6 +22,31 @@ enum direction{left, right,up,down};
 map<direction,int> dmap={{::left, 0},{::right,2},{up,1},{down,3}};
 map<direction,direction> notd={{::left, ::right},{::right,::left},{up,down},{down,up}};
 
+bool contain(vector<int> a,vector<int>b) {
+    if (b.empty()) return true;
+    if (b.size() > a.size()) return false;
+
+    for (size_t i = 0; i <= a.size() - b.size(); ++i) {
+        bool found = true;
+        for (size_t j = 0; j < b.size(); ++j) {
+            if (a[i + j] != b[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found) return true;
+    }
+    return false;
+}
+
+bool is_rotation(vector<int> a,vector<int>b){
+    if(a.size()!=b.size())return false;
+    vector<int>aa=a;
+    aa.reserve(2*a.size());
+    for(auto i:a)aa.push_back(i);
+    return contain(aa,b);
+}
+
 int main(){
     cin>>h>>w;
     vector<vector<int>> g1(h, vector<int>(w)),g2(h, vector<int>(w));
@@ -45,48 +70,84 @@ int main(){
         if (tg1==g2)
             goto can_match;
 
-        for(auto d2:dset){
-            if(d==d2||notd[d]==d2)continue;
-            tilt(dmap[d2],tg1);
-            if (tg1==g2)
+        for(auto d2:dset) {
+            if (d == d2 || notd[d] == d2)continue;
+            tilt(dmap[d2], tg1);
+            if (tg1 == g2)
                 goto can_match;
 
-            for(int i=0;i<h;i++)
-                for(int j=0;j<w;j++)
-                    if ((!!tg1[i][j])!=(!!g2[i][j]))
-                        goto pppp;
+            for (int i = 0; i < h; i++)
+                for (int j = 0; j < w; j++)
+                    if ((!!tg1[i][j]) != (!!g2[i][j]))//轮廓不一样
+                        continue;
 
             //获取转换路径
-            vector<direction> vd={notd[d],notd[d2],d,d2};
-            auto tg2=tg1;
-            auto cnt=0;
-            for(int i=0;i<h;i++)
-                for(int j=0;j<w;j++)
-                    if(tg1[i][j]!=0)
-                        tg2[i][j]=++cnt;
-            auto tg3=tg2;
-            for(auto d :vd){
-                tilt(dmap[d],tg3);
+            vector<direction> vd = {notd[d], notd[d2], d, d2};
+            auto tg2 = tg1;
+            int cnt;
+            cnt = 0;
+            map<int, pair<int, int>> cm;
+            for (int i = 0; i < h; i++)
+                for (int j = 0; j < w; j++)
+                    if (tg1[i][j] != 0) {
+                        tg2[i][j] = ++cnt;
+                        cm[cnt] = make_pair(i, j);
+                    }
+            auto tg3 = tg2;
+            for (auto d: vd) {
+                tilt(dmap[d], tg3);
             }
-            map<int,int> lmap;//转了一圈的路径映射
-            for(int k=1;k<=cnt;++k){
-                for(int i=0;i<h;i++)
+            map<int, int> lmap;//转了一圈的路径映射
+            for (int k = 1; k <= cnt; ++k) {
+                for (int i = 0; i < h; i++)
                     for (int j = 0; j < w; j++) {
                         if (tg3[i][j] == k)
                             lmap[k] = tg2[i][j];
                         goto kkk;
                     }
                 kkk:
-                int a=1;
+                int a = 1;
             }
             //已经得到了路径,然后要判断g1和g2的对应位置,看看这个转换有没有可能得到
             //找出始末图的字符串，然后看看这两个字符串是不是可以通过旋转得到的
+            vector<vector<int>> index_chain;
+            set<int> num_set;
+            for (int k = 1; k <= cnt; ++k)
+                num_set.insert(k);
+            while (!num_set.empty()) {
+                auto a = *num_set.begin();
+                num_set.erase(a);
+                vector<int> chain;
+                chain.push_back(a);
+                auto b = lmap[a];
+                while (b != a) {
+                    chain.push_back(b);
+                    b = lmap[b];
+                }
+                index_chain.push_back(chain);
+            }
+            vector<int> s1, s2;
+            for (auto i: index_chain.front()) {
+                auto [x, y] = cm[i];
+                s1.push_back(tg1[x][y]);
+            }
+            for (auto i: index_chain.front()) {
+                auto [x, y] = cm[i];
+                s2.push_back(g2[x][y]);
+            }
+            //判断S2有没有可能由S1旋转得来
+            if(is_rotation(s1,s2))
+                goto can_match;
+            else
+                goto no_match;
         }
-        pppp:
-
     }
+
+no_match:
+    cout<<"no"<<endl;
+    return 0;
 
 can_match:
     cout<<"yes"<<endl;
-
+    return 0;
 }
