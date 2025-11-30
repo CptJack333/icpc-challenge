@@ -57,7 +57,7 @@ void tilt2(int direction,vector<vector<int>>& board) {//dir: 0=left, 1=up, 2=rig
 
 }
 
-bool contain(vector<int> a,vector<int>b) {
+int contain(vector<int> a,vector<int>b) {
     if (b.empty()) return true;
     if (b.size() > a.size()) return false;
 
@@ -69,17 +69,43 @@ bool contain(vector<int> a,vector<int>b) {
                 break;
             }
         }
-        if (found) return true;
+        if (found)
+            return i;
     }
-    return false;
+    return -1;
 }
 
-bool is_rotation(vector<int> a,vector<int>b){
-    if(a.size()!=b.size())return false;
+// 使用欧几里得算法计算最大公约数
+int gcd(int a, int b) {
+    // 转换为 long long 并取绝对值，避免溢出
+    long long n1 = std::llabs(static_cast<long long>(a));
+    long long n2 = std::llabs(static_cast<long long>(b));
+
+    // 处理特殊情况：两个数都是0
+    if (n1 == 0 && n2 == 0) {
+        return 0;
+    }
+
+    // 欧几里得算法
+    while (n2 != 0) {
+        long long temp = n2;
+        n2 = n1 % n2;
+        n1 = temp;
+    }
+
+    return static_cast<int>(n1);
+}
+
+pair<int,int> is_rotation(vector<int> a,vector<int>b){// residue module
+    if(a.size()!=b.size())return {0,0};
     vector<int>aa=a;
     aa.reserve(2*a.size());
     for(auto i:a)aa.push_back(i);
-    return contain(aa,b);
+    auto r=contain(aa,b);
+    if(r!=-1)
+        return {r,a.size()};
+    else
+        return{0,0};
 }
 
 int main(){
@@ -171,17 +197,39 @@ int main(){
                 }
                 index_chain.push_back(chain);
             }
-            vector<int> s1, s2;
-            for (auto i: index_chain.front()) {
-                auto [x, y] = cm[i];
-                s1.push_back(tg1[x][y]);
+
+            bool can_match=true;
+            vector<pair<int,int>> res_mod;
+            for(auto ic:index_chain){
+                vector<int> s1, s2;
+                for (auto i: ic) {
+                    auto [x, y] = cm[i];
+                    s1.push_back(tg1[x][y]);
+                }
+                for (auto i: ic) {
+                    auto [x, y] = cm[i];
+                    s2.push_back(g2[x][y]);
+                }
+                //判断S2有没有可能由S1旋转得来
+                auto [r, m] = is_rotation(s1, s2);
+                if (m == 0) {
+                    can_match = false;
+                    break;
+                }
+                //判断线性同余方程组是否有解
+                for(auto [r2,m2] :res_mod){
+                    auto g=gcd(m,m2);
+                    if(r%g!=r2%g) {
+                        can_match = false;
+                        break;
+                    }
+                }
+                if(!can_match)break;
+                res_mod.push_back({r,m});
+
             }
-            for (auto i: index_chain.front()) {
-                auto [x, y] = cm[i];
-                s2.push_back(g2[x][y]);
-            }
-            //判断S2有没有可能由S1旋转得来
-            if(is_rotation(s1,s2))
+
+            if(can_match)
                 goto can_match;
         }
     }
