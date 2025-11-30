@@ -3,7 +3,7 @@ using namespace std;
 
 int h,w;
 
-void tilt(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
+void tilt_wrap(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
     int X = g[0].size(), Y = g.size();
     if (dir&1) swap(X, Y);
     auto get = [&](int x, int y) {
@@ -21,6 +21,10 @@ void tilt(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
 enum direction{left, right,up,down};
 map<direction,int> dmap={{::left, 0},{::right,2},{up,1},{down,3}};
 map<direction,direction> notd={{::left, ::right},{::right,::left},{up,down},{down,up}};
+
+void tilt(direction d,vector<vector<int>>& g){
+    return tilt_wrap(dmap[d],g);
+}
 
 void tilt2(int direction,vector<vector<int>>& board) {//dir: 0=left, 1=up, 2=right, 3=down
     int dr, dc;
@@ -58,8 +62,7 @@ void tilt2(int direction,vector<vector<int>>& board) {//dir: 0=left, 1=up, 2=rig
 }
 
 int contain(vector<int> a,vector<int>b) {
-    if (b.empty()) return true;
-    if (b.size() > a.size()) return false;
+    if (b.size() > a.size()) return -1;
 
     for (size_t i = 0; i <= a.size() - b.size(); ++i) {
         bool found = true;
@@ -129,16 +132,22 @@ int main(){
     if (g1==g2)
         goto can_match;
     for(auto d :dset){
-        auto tg1=g1;
-        tilt(dmap[d],tg1);
-        if (tg1==g2)
-            goto can_match;
-
         for(auto d2:dset) {
+            auto tg1=g1;
+            tilt(d,tg1);
+            if (tg1==g2)
+                goto can_match;
             if (d == d2 || notd[d] == d2)continue;
-            tilt(dmap[d2], tg1);
+            tilt(d2, tg1);
             if (tg1 == g2)
                 goto can_match;
+
+            vector<direction> vd = {notd[d], notd[d2], d, d2};
+            for(auto dd:vd){
+                tilt(dd,tg1);
+                if(tg1==g2)
+                    goto can_match;
+            }
 
             bool same_outline=true;
             for (int i = 0; i < h; i++)
@@ -152,7 +161,6 @@ int main(){
             if(!same_outline)continue;
 
             //获取转换路径
-            vector<direction> vd = {notd[d], notd[d2], d, d2};
             auto tg2 = tg1;
             int cnt;
             cnt = 0;
@@ -165,7 +173,7 @@ int main(){
                     }
             auto tg3 = tg2;
             for (auto d: vd) {
-                tilt(dmap[d], tg3);
+                tilt(d, tg3);
             }
             map<int, int> lmap;//转了一圈的路径映射
             for (int k = 1; k <= cnt; ++k) {
