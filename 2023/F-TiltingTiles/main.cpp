@@ -66,7 +66,7 @@ pair<int64_t, int64_t> match(const string& s, const string& t) {
         if (r == s.size()) return {0, 0};
         if (memcmp(&s[r], &t[0], s.size()-r) == 0 && memcmp(&s[0], &t[s.size()-r], r) == 0) break;//找字符串能对上的位置
     }
-    for (m = r ? r : 1; m < s.size(); m++) {
+    for (m = r ? r : 1; m < s.size(); m++) {//要找最小周期
         if (s.size() % m == 0 && memcmp(&s[0], &s[m], s.size()-m) == 0) break;
     }
     return {r, m};

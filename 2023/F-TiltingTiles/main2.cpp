@@ -99,16 +99,25 @@ int gcd(int a, int b) {
     return static_cast<int>(n1);
 }
 
-pair<int,int> is_rotation(vector<int> a,vector<int>b){// residue module
+pair<int,int> match(vector<int> a, vector<int>b){// residue module
     if(a.size()!=b.size())return {0,0};
     vector<int>aa=a;
     aa.reserve(2*a.size());
     for(auto i:a)aa.push_back(i);
     auto r=contain(aa,b);
-    if(r!=-1)
-        return {r,a.size()};
-    else
-        return{0,0};
+    if(r==-1)return {0,0};
+
+    auto equal=[&](int m){
+        for (auto i=0;i<a.size()-m;i++)
+            if(a[i]!=a[i+m])return false;
+        return true;
+    };
+
+    auto m = r ? r : 1;
+    for (; m < a.size(); m++) {
+        if (a.size() % m == 0 && equal(m)) break;//要找最小周期
+    }
+    return{r,m};
 }
 
 int main(){
@@ -219,10 +228,13 @@ int main(){
                     s2.push_back(g2[x][y]);
                 }
                 //判断S2有没有可能由S1旋转得来
-                auto [r, m] = is_rotation(s1, s2);
+                auto [r, m] = match(s1, s2);
                 if (m == 0) {
                     can_match = false;
                     break;
+                }
+                if(m==1){
+                    continue;
                 }
                 //判断线性同余方程组是否有解
                 for(auto [r2,m2] :res_mod){
