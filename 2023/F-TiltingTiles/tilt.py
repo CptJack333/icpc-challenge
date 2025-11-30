@@ -11,25 +11,26 @@ def move(board, direction):
     direction: 'up', 'down', 'left', 'right'
     返回新的棋盘状态
     """
-    n = len(board)
+    h=len(board)
+    w=len(board[0])
     new_board = [row[:] for row in board]  # 创建副本
 
     # 根据倾斜方向确定遍历顺序
     if direction == 'up':
-        rows = range(n)
-        cols = range(n)
+        rows = range(h)
+        cols = range(w)
         dr, dc = -1, 0
     elif direction == 'down':
-        rows = range(n-1, -1, -1)
-        cols = range(n)
+        rows = range(h-1, -1, -1)
+        cols = range(w)
         dr, dc = 1, 0
     elif direction == 'left':
-        rows = range(n)
-        cols = range(n)
+        rows = range(h)
+        cols = range(w)
         dr, dc = 0, -1
     elif direction == 'right':
-        rows = range(n)
-        cols = range(n-1, -1, -1)
+        rows = range(h)
+        cols = range(w-1, -1, -1)
         dr, dc = 0, 1
     else:
         raise ValueError("方向必须是 'up', 'down', 'left', 'right'")
@@ -43,7 +44,7 @@ def move(board, direction):
                     chess=new_board[r][c]
                     nr, nc = r + dr, c + dc
                     # 检查是否可以移动
-                    if 0 <= nr < n and 0 <= nc < n and new_board[nr][nc] == '.':
+                    if 0 <= nr < h and 0 <= nc < w and new_board[nr][nc] == '.':
                         new_board[nr][nc] = chess
                         new_board[r][c] = '.'
                         moved = True
@@ -66,10 +67,11 @@ rgyb
 .yr.
 '''
     stt='''
-1...
-2...
-34..
-5678
+I y A z L y
+B z x F z .
+y z x E K .
+C z D z . .
+J y . . . .
 '''
 
 
@@ -87,7 +89,7 @@ rgyb
 
 
     # 把stt转换成二维数组
-    board = [list(line.strip()) for line in stt.strip().split('\n')]
+    board = [list(line.strip().split()) for line in stt.strip().split('\n')]
 
 
     print("初始棋盘:")
