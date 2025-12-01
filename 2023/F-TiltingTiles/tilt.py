@@ -67,11 +67,11 @@ rgyb
 .yr.
 '''
     stt='''
-I y A z L y
-B z x F z .
-y z x E K .
-C z D z . .
-J y . . . .
+.n.n.icfbl
+.c.hb..kkj
+.l.dd...cg
+.b.bh..bge
+lh.j..ikpb
 '''
 
 
@@ -89,7 +89,7 @@ J y . . . .
 
 
     # 把stt转换成二维数组
-    board = [list(line.strip().split()) for line in stt.strip().split('\n')]
+    board = [list(line.strip().replace(" ", "").replace("\t", "").replace("\n", "")) for line in stt.strip().split('\n')]
 
 
     print("初始棋盘:")
@@ -104,7 +104,9 @@ J y . . . .
             board = [list(line.strip()) for line in stt.strip().split('\n')]
             print_board(board)
             continue
-        m={"l":"left","r":"right","u":"up","d":"down"}
+        m={
+            # "l":"left","r":"right","u":"up","d":"down",
+           "a":"left","d":"right","w":"up","s":"down"}
         board=move(board,m[cmd])
         print_board(board)
         print('-------------------')
