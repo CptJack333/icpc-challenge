@@ -167,7 +167,7 @@ int main(){
                             }
                     auto tg3 = tg2;
                     for (int j = 0; j < 4; j++)//沿着这一方向转动四次
-                        tilt(dirs[(d+j)%4], tg3);
+                        tilt(dirs[(d8+dd*j)%4], tg3);
                     map<int, int> lmap;//转了一圈的路径映射
                     for (int k = 1; k <= cnt; ++k) {
                         for (int i = 0; i < h; i++)
