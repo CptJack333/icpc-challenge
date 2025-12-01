@@ -118,7 +118,7 @@ int main() {
                                     t += g2[y2][x2];
                                     ptr = &ng[y2][x2];
                                 }
-
+                                //cout<<s.size()<<endl;
                                 auto [residue, mod] = match(s, t);
                                 if (mod == 0)
                                     goto nomatch;

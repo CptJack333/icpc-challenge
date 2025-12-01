@@ -137,124 +137,105 @@ int main(){
                 v = ch - 'a' + 1;
         }
 
-    set<direction> dset={::left,::right,up,down};
-    if (g1==g2)
-        goto can_match;
-    for(auto d :dset){
-        for(auto d2:dset) {
-            auto tg1=g1;
-            tilt(d,tg1);
-            if (tg1==g2)
-                goto can_match;
-            if (d == d2 || notd[d] == d2)continue;
-            tilt(d2, tg1);
-            if (tg1 == g2)
-                goto can_match;
-
-            vector<direction> vd = {notd[d], notd[d2], d, d2};
-            for(auto dd:vd){
-                tilt(dd,tg1);
-                if(tg1==g2)
+    vector<direction> dirs={::left,up,::right,down};
+    for (int sd = 0; sd < 4; sd++)
+        for (int dd = 1; dd < 4; dd += 2) {
+            auto tg1 = g1;
+            for (int i = 0, d8 = sd; i <= 6; i++, d8 = (d8 + dd) % 4) //0=left, 1=up, 2=right, 3=down
+            {//4x2中间状态枚举
+                auto d=dirs[d8];
+                if (tg1 == g2)
                     goto can_match;
-            }
+                if(i>=2){
 
-            bool same_outline=true;
-            for (int i = 0; i < h; i++)
-                for (int j = 0; j < w; j++)
-                    if ((!!tg1[i][j]) != (!!g2[i][j]))//轮廓不一样
-                    {
-                        same_outline=false;
-                        goto end_loop;
-                    }
-            end_loop:
-            if(!same_outline)continue;
+                    bool same_outline = true;
+                    for (int i = 0; i < h; i++)
+                        for (int j = 0; j < w; j++)
+                            if ((!!tg1[i][j]) != (!!g2[i][j]))//轮廓不一样
+                                goto no_match;
 
-            //获取转换路径
-            auto tg2 = tg1;
-            int cnt;
-            cnt = 0;
-            map<int, pair<int, int>> cm;
-            for (int i = 0; i < h; i++)
-                for (int j = 0; j < w; j++)
-                    if (tg1[i][j] != 0) {
-                        tg2[i][j] = ++cnt;
-                        cm[cnt] = make_pair(i, j);
+                    //获取转换路径
+                    auto tg2 = tg1;
+                    int cnt;
+                    cnt = 0;
+                    map<int, pair<int, int>> cm;
+                    for (int i = 0; i < h; i++)
+                        for (int j = 0; j < w; j++)
+                            if (tg1[i][j] != 0) {
+                                tg2[i][j] = ++cnt;
+                                cm[cnt] = make_pair(i, j);
+                            }
+                    auto tg3 = tg2;
+                    for (int j = 0; j < 4; j++)//沿着这一方向转动四次
+                        tilt(dirs[(d+j)%4], tg3);
+                    map<int, int> lmap;//转了一圈的路径映射
+                    for (int k = 1; k <= cnt; ++k) {
+                        for (int i = 0; i < h; i++)
+                            for (int j = 0; j < w; j++)
+                                if (tg3[i][j] == k) {
+                                    lmap[k] = tg2[i][j];
+                                    goto double_break;
+                                }
+                        double_break:
+                        int a = 1;
                     }
-            auto tg3 = tg2;
-            for (auto d: vd) {
-                tilt(d, tg3);
-            }
-            map<int, int> lmap;//转了一圈的路径映射
-            for (int k = 1; k <= cnt; ++k) {
-                for (int i = 0; i < h; i++)
-                    for (int j = 0; j < w; j++)
-                        if (tg3[i][j] == k) {
-                            lmap[k] = tg2[i][j];
-                            goto double_break;
+                    //已经得到了路径,然后要判断g1和g2的对应位置,看看这个转换有没有可能得到
+                    //找出始末图的字符串，然后看看这两个字符串是不是可以通过旋转得到的
+                    vector<vector<int>> index_chain;
+                    set<int> num_set;
+                    for (int k = 1; k <= cnt; ++k)
+                        num_set.insert(k);
+                    while (!num_set.empty()) {
+                        auto a = *num_set.begin();
+                        num_set.erase(a);
+                        vector<int> chain;
+                        chain.push_back(a);
+                        auto b = lmap[a];
+                        while (b != a) {
+                            chain.push_back(b);
+                            num_set.erase(b);
+                            b = lmap[b];
                         }
-                double_break:
-                int a = 1;
-            }
-            //已经得到了路径,然后要判断g1和g2的对应位置,看看这个转换有没有可能得到
-            //找出始末图的字符串，然后看看这两个字符串是不是可以通过旋转得到的
-            vector<vector<int>> index_chain;
-            set<int> num_set;
-            for (int k = 1; k <= cnt; ++k)
-                num_set.insert(k);
-            while (!num_set.empty()) {
-                auto a = *num_set.begin();
-                num_set.erase(a);
-                vector<int> chain;
-                chain.push_back(a);
-                auto b = lmap[a];
-                while (b != a) {
-                    chain.push_back(b);
-                    num_set.erase(b);
-                    b = lmap[b];
-                }
-                index_chain.push_back(chain);
-            }
-
-            bool can_match=true;
-            vector<pair<int,int>> res_mod;
-            for(auto ic:index_chain){
-                vector<int> s1, s2;
-                for (auto i: ic) {
-                    auto [x, y] = cm[i];
-                    s1.push_back(tg1[x][y]);
-                }
-                for (auto i: ic) {
-                    auto [x, y] = cm[i];
-                    s2.push_back(g2[x][y]);
-                }
-                //判断S2有没有可能由S1旋转得来
-                auto [r, m] = match(s1, s2);
-                if (m == 0) {
-                    can_match = false;
-                    break;
-                }
-                if(m==1){
-                    continue;
-                }
-                //判断线性同余方程组是否有解
-                for(auto [r2,m2] :res_mod){
-                    auto g=gcd(m,m2);
-                    if(r%g!=r2%g) {
-                        can_match = false;
-                        break;
+                        index_chain.push_back(chain);
                     }
+
+                    bool can_match = true;
+                    vector<pair<int, int>> res_mod;
+                    for (auto ic: index_chain) {
+                        vector<int> s1, s2;
+                        for (auto i: ic) {
+                            auto [x, y] = cm[i];
+                            s1.push_back(tg1[x][y]);
+                        }
+                        for (auto i: ic) {
+                            auto [x, y] = cm[i];
+                            s2.push_back(g2[x][y]);
+                        }
+                        //判断S2有没有可能由S1旋转得来
+                        auto [r, m] = match(s1, s2);
+                        if (m == 0)
+                            goto no_match;
+                        if (m == 1)
+                            continue;
+                        //判断线性同余方程组是否有解
+                        for (auto [r2, m2]: res_mod) {
+                            auto g = gcd(m, m2);
+                            if (r % g != r2 % g)
+                                goto no_match;
+                        }
+                        if (!can_match)break;
+                        res_mod.push_back({r, m});
+
+                    }
+
+                    if (can_match)
+                        goto can_match;
                 }
-                if(!can_match)break;
-                res_mod.push_back({r,m});
-
+                no_match:;
+                tilt(d, tg1);
             }
-
-            if(can_match)
-                goto can_match;
         }
-    }
 
-no_match:
     cout<<"no"<<endl;
     return 0;
 
