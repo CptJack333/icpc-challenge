@@ -162,74 +162,40 @@ int main(){
                     for (int i = 0; i < h; i++)
                         for (int j = 0; j < w; j++)
                             if (tg1[i][j] != 0) {
-                                tg2[i][j] = ++cnt;
+                                tg2[i][j] = i*w+j+1;
                                 cm[cnt] = make_pair(i, j);
                             }
-                    auto tg3 = tg2;
                     for (int j = 0; j < 4; j++)//沿着这一方向转动四次
-                        tilt(dirs[(d8+dd*j)%4], tg3);
-                    map<int, int> lmap;//转了一圈的路径映射
-                    for (int k = 1; k <= cnt; ++k) {
-                        for (int i = 0; i < h; i++)
-                            for (int j = 0; j < w; j++)
-                                if (tg3[i][j] == k) {
-                                    lmap[k] = tg2[i][j];
-                                    goto double_break;
-                                }
-                        double_break:
-                        int a = 1;
-                    }
-                    //已经得到了路径,然后要判断g1和g2的对应位置,看看这个转换有没有可能得到
+                        tilt(dirs[(d8+dd*j)%4], tg2);
                     //找出始末图的字符串，然后看看这两个字符串是不是可以通过旋转得到的
-                    vector<vector<int>> index_chain;
-                    set<int> num_set;
-                    for (int k = 1; k <= cnt; ++k)
-                        num_set.insert(k);
-                    while (!num_set.empty()) {
-                        auto a = *num_set.begin();
-                        num_set.erase(a);
-                        vector<int> chain;
-                        chain.push_back(a);
-                        auto b = lmap[a];
-                        while (b != a) {
-                            chain.push_back(b);
-                            num_set.erase(b);
-                            b = lmap[b];
-                        }
-                        index_chain.push_back(chain);
-                    }
-
-                    bool can_match = true;
                     vector<pair<int, int>> res_mod;
-                    for (auto ic: index_chain) {
-                        vector<int> s1, s2;
-                        for (auto i: ic) {
-                            auto [x, y] = cm[i];
-                            s1.push_back(tg1[x][y]);
+                    for(int i=0;i<h;++i)
+                        for(int j=0;j<w;++j){
+                            if(tg2[i][j]){
+                                vector<int> s1, s2;
+                                for (int *ptr = &tg2[i][j]; *ptr;) {
+                                    int x2 = (*ptr-1) % w, y2 = (*ptr - 1) / w;
+                                    *ptr = 0;
+                                    s1.push_back(tg1[y2][x2]);
+                                    s2.push_back(g2[y2][x2]);
+                                    ptr = &tg2[y2][x2];
+                                }
+                                //找出旋转的mod和res
+                                auto [r, m] = match(s1, s2);
+                                if (m == 0)
+                                    goto no_match;
+                                if (m == 1)
+                                    continue;
+                                //判断线性同余方程组是否有解
+                                for (auto [r2, m2]: res_mod) {
+                                    auto g = gcd(m, m2);
+                                    if (r % g != r2 % g)
+                                        goto no_match;
+                                }
+                                res_mod.push_back({r, m});
+                            }
                         }
-                        for (auto i: ic) {
-                            auto [x, y] = cm[i];
-                            s2.push_back(g2[x][y]);
-                        }
-                        //判断S2有没有可能由S1旋转得来
-                        auto [r, m] = match(s1, s2);
-                        if (m == 0)
-                            goto no_match;
-                        if (m == 1)
-                            continue;
-                        //判断线性同余方程组是否有解
-                        for (auto [r2, m2]: res_mod) {
-                            auto g = gcd(m, m2);
-                            if (r % g != r2 % g)
-                                goto no_match;
-                        }
-                        if (!can_match)break;
-                        res_mod.push_back({r, m});
-
-                    }
-
-                    if (can_match)
-                        goto can_match;
+                    goto can_match;
                 }
                 no_match:;
                 tilt(d, tg1);
