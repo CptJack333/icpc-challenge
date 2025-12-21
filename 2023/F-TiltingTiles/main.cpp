@@ -1,15 +1,9 @@
-#include <algorithm>
-#include <cstring>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cstdint>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-template<typename T> constexpr T Gcd(const T& a, const T& b) { return b != 0 ? Gcd(b, a%b) : a < 0 ? -a : a; }
+int h,w;
 
-void tilt(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
+void tilt_wrap(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
     int X = g[0].size(), Y = g.size();
     if (dir&1) swap(X, Y);
     auto get = [&](int x, int y) {
@@ -24,19 +18,27 @@ void tilt(int dir, vector<vector<int>>& g) {//dir: 0=left, 1=up, 2=right, 3=down
     }
 }
 
+enum direction{left, right,up,down};
+map<direction,int> dmap={{::left, 0},{::right,2},{up,1},{down,3}};
+map<direction,direction> notd={{::left, ::right},{::right,::left},{up,down},{down,up}};
+
+void tilt(direction d,vector<vector<int>>& g){
+    return tilt_wrap(dmap[d],g);
+}
+
 void tilt2(int direction,vector<vector<int>>& board) {//dir: 0=left, 1=up, 2=right, 3=down
     int dr, dc;
     auto h=board.size(),w=board[0].size();
-    if (direction == 1) {
+    if (direction == up) {
         dr = -1; dc = 0;
     }
-    else if (direction == 3) {
+    else if (direction == down) {
         dr = 1; dc = 0;
     }
-    else if (direction == 0) {
+    else if (direction == ::left) {
         dr = 0; dc = -1;
     }
-    else if (direction == 2) {
+    else if (direction == ::right) {
         dr = 0; dc = 1;
     }
 
@@ -59,89 +61,151 @@ void tilt2(int direction,vector<vector<int>>& board) {//dir: 0=left, 1=up, 2=rig
 
 }
 
-pair<int64_t, int64_t> match(const string& s, const string& t) {
-    // Who needs hashing/string algorithms?
-    int64_t r, m;
-    for (r = 0; r <= s.size(); r++) {
-        if (r == s.size()) return {0, 0};
-        if (memcmp(&s[r], &t[0], s.size()-r) == 0 && memcmp(&s[0], &t[s.size()-r], r) == 0) break;//找字符串能对上的位置
+int contain(vector<int> a,vector<int>b) {
+    if (b.size() > a.size()) return -1;
+
+    for (size_t i = 0; i <= a.size() - b.size(); ++i) {
+        bool found = true;
+        for (size_t j = 0; j < b.size(); ++j) {
+            if (a[i + j] != b[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found)
+            return i;
     }
-    for (m = r ? r : 1; m < s.size(); m++) {//要找最小周期
-        if (s.size() % m == 0 && memcmp(&s[0], &s[m], s.size()-m) == 0) break;
-    }
-    return {r, m};
+    return -1;
 }
 
-int main() {
-    int h, w;
-    cin >> h >> w;
-    vector<vector<int>> g(h, vector<int>(w)), g2 = g;
+// 使用欧几里得算法计算最大公约数
+int gcd(int a, int b) {
+    // 转换为 long long 并取绝对值，避免溢出
+    long long n1 = std::llabs(static_cast<long long>(a));
+    long long n2 = std::llabs(static_cast<long long>(b));
+
+    // 处理特殊情况：两个数都是0
+    if (n1 == 0 && n2 == 0) {
+        return 0;
+    }
+
+    // 欧几里得算法
+    while (n2 != 0) {
+        long long temp = n2;
+        n2 = n1 % n2;
+        n1 = temp;
+    }
+
+    return static_cast<int>(n1);
+}
+
+pair<int,int> match(vector<int> a, vector<int>b){// residue module
+    if(a.size()!=b.size())return {0,0};
+    vector<int>aa=a;
+    aa.reserve(2*a.size());
+    for(auto i:a)aa.push_back(i);
+    auto r=contain(aa,b);
+    if(r==-1)return {0,0};
+
+    auto equal=[&](int m){
+        for (auto i=0;i<a.size()-m;i++)
+            if(a[i]!=a[i+m])return false;
+        return true;
+    };
+
+    auto m = r ? r : 1;
+    for (; m < a.size(); m++) {
+        if (a.size() % m == 0 && equal(m)) break;//要找最小周期
+    }
+    return{r,m};
+}
+
+int main(){
+    cin>>h>>w;
+    vector<vector<int>> g1(h, vector<int>(w)),g2(h, vector<int>(w));
     char ch;
-    for (auto &row: g)
+    for (auto &row: g1)
         for (auto &v: row) {
             cin >> ch;
-            if (ch != '.') v = ch - 'a' + 1;
+            if (ch != '.')
+                v = ch - 'a' + 1;
         }
     for (auto &row: g2)
         for (auto &v: row) {
             cin >> ch;
-            if (ch != '.') v = ch - 'a' + 1;
+            if (ch != '.')
+                v = ch - 'a' + 1;
         }
 
+    vector<direction> dirs={::left,up,::right,down};
     for (int sd = 0; sd < 4; sd++)
-        for (int dd = 1; dd < 4; dd += 2) {//4x2中间状态枚举
-            auto tg = g;
-            for (int i = 0, d = sd; i <= 6; i++, d = (d + dd) % 4) {//0=left, 1=up, 2=right, 3=down
-                if (tg == g2)
-                    goto pass;
-                if (i >= 2) {
-                    auto ng = tg;
-                    for (int y = 0; y < h; y++)//检查外廓形状是否一致
-                        for (int x = 0; x < w; x++) {
-                            if (!!g2[y][x] != !!ng[y][x])//整个grid里面的tiles的外廓形状不一致
-                                goto nomatch;
-                            if (ng[y][x])//给每个位置一个独立的数字编号
-                                ng[y][x] = y * w + x + 1;
-                        }
-                    for (int j = 0; j < 4; j++)//沿着这一方向转动四次
-                        tilt((d + j) % 4, ng);
-                    vector<int64_t> residues, mods;
-                    for (int y = 0; y < h; y++)
-                        for (int x = 0; x < w; x++)
-                            if (ng[y][x]) {
-                                string s, t;//找出 转动的变换路径
-                                //找出这个格子所属的变换路径
-                                for (int *ptr = &ng[y][x]; *ptr;) {
-                                    int x2 = (*ptr - 1) % w, y2 = (*ptr - 1) / w;
-                                    *ptr = 0;
-                                    s += tg[y2][x2];
-                                    t += g2[y2][x2];
-                                    ptr = &ng[y2][x2];
-                                }
-                                //cout<<s.size()<<endl;
-                                auto [residue, mod] = match(s, t);
-                                if (mod == 0)
-                                    goto nomatch;
-                                if (mod == 1)
-                                    continue;
-                                for (int i = 0; i < mods.size(); i++) {//验证线性同余方程组是否有解
-                                    int64_t g = Gcd(mod, mods[i]);
-                                    if (residues[i] % g != residue % g) goto nomatch;
-                                }
-                                //cerr << "Adding r=" << residue << " m=" << mod << endl;
-                                residues.push_back(residue);
-                                mods.push_back(mod);
+        for (int dd = 1; dd < 4; dd += 2) {
+            auto tg1 = g1;
+            for (int i = 0, d8 = sd; i <= 6; i++, d8 = (d8 + dd) % 4) //0=left, 1=up, 2=right, 3=down
+            {//4x2中间状态枚举
+                auto d=dirs[d8];
+                if (tg1 == g2)
+                    goto can_match;
+                if(i>=2){
+
+                    bool same_outline = true;
+                    for (int i = 0; i < h; i++)
+                        for (int j = 0; j < w; j++)
+                            if ((!!tg1[i][j]) != (!!g2[i][j]))//轮廓不一样
+                                goto no_match;
+
+                    //获取转换路径
+                    auto tg2 = tg1;
+                    int cnt;
+                    cnt = 0;
+                    map<int, pair<int, int>> cm;
+                    for (int i = 0; i < h; i++)
+                        for (int j = 0; j < w; j++)
+                            if (tg1[i][j] != 0) {
+                                tg2[i][j] = i*w+j+1;
+                                cm[cnt] = make_pair(i, j);
                             }
-                    goto pass;
+                    for (int j = 0; j < 4; j++)//沿着这一方向转动四次
+                        tilt(dirs[(d8+dd*j)%4], tg2);
+                    //找出始末图的字符串，然后看看这两个字符串是不是可以通过旋转得到的
+                    vector<pair<int, int>> res_mod;
+                    for(int i=0;i<h;++i)
+                        for(int j=0;j<w;++j){
+                            if(tg2[i][j]){
+                                vector<int> s1, s2;
+                                for (int *ptr = &tg2[i][j]; *ptr;) {
+                                    int x2 = (*ptr-1) % w, y2 = (*ptr - 1) / w;
+                                    *ptr = 0;
+                                    s1.push_back(tg1[y2][x2]);
+                                    s2.push_back(g2[y2][x2]);
+                                    ptr = &tg2[y2][x2];
+                                }
+                                //找出旋转的mod和res
+                                auto [r, m] = match(s1, s2);
+                                if (m == 0)
+                                    goto no_match;
+                                if (m == 1)
+                                    continue;
+                                //判断线性同余方程组是否有解
+                                for (auto [r2, m2]: res_mod) {
+                                    auto g = gcd(m, m2);
+                                    if (r % g != r2 % g)
+                                        goto no_match;
+                                }
+                                res_mod.push_back({r, m});
+                            }
+                        }
+                    goto can_match;
                 }
-                nomatch:;
-                tilt(d, tg);
+                no_match:;
+                tilt(d, tg1);
             }
         }
 
-    fail:
-    cout << "no" << endl;
+    cout<<"no"<<endl;
     return 0;
-    pass:
-    cout << "yes" << endl;
+
+can_match:
+    cout<<"yes"<<endl;
+    return 0;
 }
