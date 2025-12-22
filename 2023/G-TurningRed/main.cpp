@@ -34,6 +34,13 @@ int main(){
     }
 
     vector<set<int>> light_related_button_org=light_related_button;
+//    for(auto s:light_related_button){
+//        set<int> new_set;
+//        for(auto v:s){
+//            new_set.insert(v);
+//        }
+//        light_related_button_org.push_back(new_set);
+//    }
 
     while(true){
         int i=1;
@@ -63,25 +70,29 @@ int main(){
         for (int i = 1; i <= l; ++i)
             if (lights[i] != 0) {
                 all_red=false;
+
                 if(travesered_light.count(i)){
                     cout << "impossible" << endl;
                     return 0;
                 }
+
                 travesered_light.insert(i);
+
                 if (light_related_button_org[i].empty()) {
                     cout << "impossible" << endl;
                     return 0;
                 }
+
                 int press_times = (3 - lights[i]) % 3;
                 int but = *light_related_button_org[i].begin();
                 if (solution[but] != -1)
                     but = *light_related_button_org[i].rbegin();
+
                 solution[but] = press_times;
+
                 for(auto li:button_control_lights[but]){
-                    light_related_button_org[li].erase(but);
                     lights[li]=(lights[li]+press_times)%3;
                 }
-                continue;
             }
         if(all_red)break;
     }
