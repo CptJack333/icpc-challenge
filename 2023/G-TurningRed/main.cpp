@@ -42,11 +42,17 @@ int main(){
 //        light_related_button_org.push_back(new_set);
 //    }
 
+    //先解出只被一个按钮控制的灯的按压次数
     while(true){
         int i=1;
-        for (;i<=l;++i)
-            if(light_related_button[i].size()==1)
+        for (;i<=l;++i) {
+            if (light_related_button[i].size() == 0 && lights[i] != 0) {
+                cout << "impossible" << endl;
+                return 0;
+            }
+            if (light_related_button[i].size() == 1)
                 break;
+        }
         if(i>l)
             break;
         int but=*light_related_button[i].begin();
@@ -61,6 +67,20 @@ int main(){
         }else{
             cout<<"impossible"<<endl;
             return 0;
+        }
+    }
+
+    //剩下的灯都是被两个按钮控制的
+    for (int i = 1; i <= l; ++i){
+        if(lights[i]!=0&&light_related_button_org[i].size()==2){
+            int press_times = (3 - lights[i]) % 3;
+            int but1=*light_related_button_org[i].begin(), but2=*light_related_button_org[i].rbegin();
+            for(int p1=0;p1<=2;++p1)
+                for(int p2=0;p2<=2;++p2){
+                    if(p1+p2!=press_times)continue;
+                    solution
+                }
+            try_but()
         }
     }
 
