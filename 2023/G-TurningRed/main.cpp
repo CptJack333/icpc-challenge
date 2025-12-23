@@ -87,6 +87,10 @@ int main(){
                 int but = *light_related_button_org[i].begin();
                 if (solution[but] != -1)
                     but = *light_related_button_org[i].rbegin();
+                if(solution[but] != -1){
+                    cout << "impossible" << endl;
+                    return 0;
+                }
 
                 solution[but] = press_times;
 
