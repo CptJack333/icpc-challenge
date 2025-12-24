@@ -18,9 +18,6 @@ int main(){
         cin>>t;
         lights[i]=lmap[t];
     }
-    auto lights_copy=lights;
-
-    vector<vector<int>> g(l+1,vector<int>(l+1,0));
 
     button_control_lights.resize(b+1);
     solution.resize(b+1);
@@ -36,15 +33,6 @@ int main(){
         }
     }
 
-    vector<set<int>> light_related_button_org=light_related_button;
-//    for(auto s:light_related_button){
-//        set<int> new_set;
-//        for(auto v:s){
-//            new_set.insert(v);
-//        }
-//        light_related_button_org.push_back(new_set);
-//    }
-
     vector<vector<int>> connected_components;
     int light_cnt=0;
     vector<bool> visited_li(l+1,false);
@@ -52,6 +40,7 @@ int main(){
         int i=1;
         for(;i<=l;i++)if(!visited_li[i])break;
         vector<int> comp;
+        //需要设置ulimit -s unlimited 允许无限栈大小
         std::function<void(int)> recur=[&](int li){
             visited_li[li]=true;
             ++light_cnt;
