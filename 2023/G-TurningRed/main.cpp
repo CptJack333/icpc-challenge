@@ -68,15 +68,24 @@ int main(){
     int ans =0;
 
     for(auto cc:connected_components){
-        if(cc.size()==1 && lights[cc.front()]!=0){
-            cout<<"impossilbe"<<endl;
-            return 0;
+        if(cc.size()==1 ){
+            if(light_related_button[cc.front()].empty() && lights[cc.front()]!=0) {
+                cout<<"impossible"<<endl;
+                return 0;
+            }
+            int press_times = (3 - lights[cc.front()]) % 3;
+            ans+=press_times;
+            continue;
         }
 
         auto l=cc.front();
         set<int> visited;
 
         std::function<bool(int)> recur=[&](int l)->bool{
+            //每个节点进来,先判断是不是所有的路径的解都求出来了
+            //如果求出来了,就判断是否符合按压次数
+            //如果没求出来,求解
+            //无论是否求解了,都从所有路径扩散出去
             if (visited.count(l))return true;
             visited.insert(l);
 
@@ -88,42 +97,37 @@ int main(){
             //获取两个按钮按下的次数
             auto p1=solution[but1];
             auto p2=but2!=-1?solution[but2]:0;//如果只有一个按钮,虚拟按钮次数为0
-            //如果只有一个按钮,这个按钮的sol必然为0/1/2
-            //如果有两个按钮,则需要通过一个按钮的次数,计算另一个的次数
-            if(related_button.size()==2){
-                if(p1==-1)p1=press_times-p2;
-                if(p2==-1)p2=press_times-p1;
-            }
-            //如果上面传入的按钮次数不合理，无解
-            if(p1<0||p2<0)return false;
-            if((p1+p2)%3!=press_times)return false;
 
-            solution[but2]=press_times-solution[but1];
-
-            //遍历两个按钮关联的其它灯
-            if(but1!=-1)
-            for(auto l2:button_control_lights[but1]){
-                auto b=recur(l2);
-                if(!b)return false;
+            if(p1!=-1 && p2 !=-1){
+                if((p1+p2)%3!=press_times)return false;
+            }else{
+                auto& sol=p2==-1?solution[but2]:solution[but1];
+                if(p1==-1)swap(p1,p2);
+                p2=press_times-p1;
+                while(p2<0)p2+=3;
+                sol=p2;
             }
+
+            for(auto l2:button_control_lights[but1])
+                if(!recur(l2))return false;
             if(but2!=-1)
-            for(auto l2:button_control_lights[but2]){
-                auto b=recur(l2);
-                if(!b)return false;
-            }
+            for(auto l2:button_control_lights[but2])
+                if(!recur(l2))return false;
+
             return true;
         };
 
-        int min_tot=(2>>31)-1;
+        int min_tot=0x7FFFFFFF;
         bool found_sol=false;
         for(int i=0;i<=2;++i)
             for(int j=0;j<=2;++j){
-                for(int k=0;k<solution.size();++k)solution[k]=-1;
+                solution=vector<int>(solution.size(),-1);
                 auto related_button=light_related_button[l];
                 if(related_button.size()>=1)
                     solution[*related_button.begin()]=i;
                 if(related_button.size()==2)
                     solution[*related_button.rbegin()]=j;
+                visited.clear();
                 if(recur(l)){
                     found_sol=true;
                     int tot=0;
@@ -134,95 +138,12 @@ int main(){
                 }
             }
         if(!found_sol){
-            cout<<"impossilbe"<<endl;
+            cout<<"impossible"<<endl;
             return 0;
         }
         ans+=min_tot;
     }
-    for (int i = 1; i <= l; ++i){
-        if(lights[i]!=0&&light_related_button_org[i].size()==2){
-            int press_times = (3 - lights[i]) % 3;
-            int but1=*light_related_button_org[i].begin(), but2=*light_related_button_org[i].rbegin();
-            for(int p1=0;p1<=2;++p1)
-                for(int p2=0;p2<=2;++p2){
-                    if(p1+p2!=press_times)continue;
-                    solution
-                }
-            try_but()
-        }
-    }
 
-    //先解出只被一个按钮控制的灯的按压次数
-    while(true){
-        int i=1;
-        for (;i<=l;++i) {
-            if (light_related_button[i].size() == 0 && lights[i] != 0) {
-                cout << "impossible" << endl;
-                return 0;
-            }
-            if (light_related_button[i].size() == 1)
-                break;
-        }
-        if(i>l)
-            break;
-        int but=*light_related_button[i].begin();
-        if(solution[but]==-1){
-            int press_times=(3-lights[i])%3;
-            solution[but]=press_times;
-            for(auto li:button_control_lights[but]){
-                lights[li]=(lights[li]+press_times)%3;
-                light_related_button[li].erase(but);
-            }
-
-        }else{
-            cout<<"impossible"<<endl;
-            return 0;
-        }
-    }
-
-    //剩下的灯都是被两个按钮控制的
-
-
-    set<int> travesered_light;
-    while(true) {
-        bool all_red=true;
-        for (int i = 1; i <= l; ++i)
-            if (lights[i] != 0) {
-                all_red=false;
-
-                if(travesered_light.count(i)){
-                    cout << "impossible" << endl;
-                    return 0;
-                }
-
-                travesered_light.insert(i);
-
-                if (light_related_button_org[i].empty()) {
-                    cout << "impossible" << endl;
-                    return 0;
-                }
-
-                int press_times = (3 - lights[i]) % 3;
-                int but = *light_related_button_org[i].begin();
-                if (solution[but] != -1)
-                    but = *light_related_button_org[i].rbegin();
-                if(solution[but] != -1){
-                    cout << "impossible" << endl;
-                    return 0;
-                }
-
-                solution[but] = press_times;
-
-                for(auto li:button_control_lights[but]){
-                    lights[li]=(lights[li]+press_times)%3;
-                }
-            }
-        if(all_red)break;
-    }
-    int tot=0;
-    for(int i=1;i<=b;++i)
-        if(solution[i]!=-1)
-            tot+=solution[i];
-    cout<<tot<<endl;
+    cout<<ans<<endl;
     return 0;
 }
