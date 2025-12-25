@@ -39,21 +39,26 @@ int main(){
     while(light_cnt<l){
         int i=1;
         for(;i<=l;i++)if(!visited_li[i])break;
+        if(i>l)break;
         vector<int> comp;
         //需要设置ulimit -s unlimited 允许无限栈大小
-        std::function<void(int)> recur=[&](int li){
-            visited_li[li]=true;
+        stack<int> li_stack;
+        li_stack.push(i);visited_li[i]=true;
+        while(!li_stack.empty()){
+            auto li=li_stack.top();
+            li_stack.pop();
             ++light_cnt;
             comp.push_back(li);
             for(auto bu :light_related_button[li])
                 for(auto l2:button_control_lights[bu])
-                    if(!visited_li[l2])
-                        recur(l2);
-        };
-        recur(i);
+                    if(!visited_li[l2]) {
+                        li_stack.push(l2);
+                        visited_li[l2]=true;
+                    }
+        }
         connected_components.push_back(comp);
     }
-
+//    cout<<"DONE CC"<<endl;
     int ans =0;
 
     for(auto cc:connected_components){
