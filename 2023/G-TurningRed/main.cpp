@@ -71,26 +71,29 @@ int main(){
             continue;
         }
 
-        auto l=cc.front();
-        set<int> visited;
+        auto lf=cc.front();
+//        set<int> visited;
 
-        std::function<bool(int)> recur=[&](int l)->bool{
+        std::function<bool(int)> recur=[&](int ll)->bool{
+            vector<bool> visited(l+1,false);
             stack<int> recur_stack;
-            recur_stack.push(l);
+            recur_stack.push(ll);
 //            visited.insert(l);
             //每个节点进来,先判断是不是所有的路径的解都求出来了
             //如果求出来了,就判断是否符合按压次数
             //如果没求出来,求解
             //无论是否求解了,都从所有路径扩散出去
             while(!recur_stack.empty()){
-                auto l=recur_stack.top();
+                auto lt=recur_stack.top();
                 recur_stack.pop();
-                if (visited.count(l))continue;
-                visited.insert(l);
+                if (visited[lt])continue;
+                visited[lt]=true;
+//                if (visited.count(l))continue;
+//                visited.insert(l);
 
-                int press_times = (3 - lights[l]) % 3;
+                int press_times = (3 - lights[lt]) % 3;
                 //获取这个灯关联的两个按钮
-                auto related_button = light_related_button[l];
+                auto related_button = light_related_button[lt];
                 auto but1 = *related_button.begin();
                 auto but2 = related_button.size() == 2 ? *related_button.rbegin() : -1;
                 //获取两个按钮按下的次数
@@ -108,11 +111,13 @@ int main(){
                 }
 
                 for (auto l2: button_control_lights[but1])
-                    recur_stack.push(l2);
+                    if(!visited[l2])
+                        recur_stack.push(l2);
 //                    if (!recur(l2))return false;
                 if (but2 != -1)
                     for (auto l2: button_control_lights[but2])
-                        recur_stack.push(l2);
+                        if(!visited[l2])
+                            recur_stack.push(l2);
 //                        if (!recur(l2))return false;
 
             }
@@ -124,13 +129,13 @@ int main(){
         for(int i=0;i<=2;++i)
             for(int j=0;j<=2;++j){
                 solution=vector<int>(solution.size(),-1);
-                auto related_button=light_related_button[l];
+                auto related_button=light_related_button[lf];
                 if(related_button.size()>=1)
                     solution[*related_button.begin()]=i;
                 if(related_button.size()==2)
                     solution[*related_button.rbegin()]=j;
-                visited.clear();
-                if(recur(l)){
+//                visited=vector<int>(l+1,0);
+                if(recur(lf)){
                     found_sol=true;
                     int tot=0;
                     for(int k=0;k<solution.size();++k)
