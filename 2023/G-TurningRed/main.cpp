@@ -43,27 +43,32 @@ int main(){
 
     vector<int> lvisited(l+1,false);
     vector<int> bvisited(b+1,false);
+    vector<vector<node>> connected_componets;
 
     for(int li=1;li<=l;++li){
         if(lvisited[li])continue;
 
         int min_tot=0x7FFFFFFF;
         bool found_sol=false;
-        vector<int> connected_componet;
+        vector<node> connected_componet;
 
         for(int i=0;i<=2;++i)
-            for(int j=0;j<=2;++j){
+        for(int j=0;j<=2;++j){
             connected_componet.clear();
 
             std::function<bool(node)> recur = [&](node n)->bool {
                 if (n.type == 1) {
+                    if(light_related_button[n.index].empty() && lights[n.index]!=0) {
+                        return false;
+                    }
+
                     if (lvisited[n.index])return true;
                     lvisited[n.index] = true;
-                    connected_componet.push_back(n.index);
                 } else {
                     if (bvisited[n.index])return true;
                     bvisited[n.index] = true;
                 }
+                connected_componet.push_back(n);
 
                 if(n.type==2){
                     for(auto l3:button_control_lights[n.index])
@@ -74,7 +79,7 @@ int main(){
 
                 int press_times = (3 - lights[n.index]) % 3;
                 //获取这个灯关联的两个按钮
-                auto related_button = light_related_button[li];
+                auto related_button = light_related_button[n.index];
                 auto but1 = *related_button.begin();
                 auto but2 = related_button.size() == 2 ? *related_button.rbegin() : -1;
                 //获取两个按钮按下的次数
@@ -82,7 +87,8 @@ int main(){
                 auto p2 = but2 != -1 ? solution[but2] : 0;//如果只有一个按钮,虚拟按钮次数为0
 
                 if (p1 != -1 && p2 != -1) {
-                    if ((p1 + p2) % 3 != press_times)return false;
+                    if ((p1 + p2) % 3 != press_times)
+                        return false;
                 } else {
                     auto &sol = p2 == -1 ? solution[but2] : solution[but1];
                     if (p1 == -1)swap(p1, p2);
@@ -112,13 +118,22 @@ int main(){
                         tot+=k;
                 min_tot=min(tot,min_tot);
             }
-            for(auto c:connected_componet)lvisited[c]=false;
+            for(auto n:connected_componet)
+                if(n.type==1)
+                    lvisited[n.index]=false;
+                else
+                    bvisited[n.index]=false;
         }
         if(!found_sol){
             cout<<"impossible"<<endl;
             return 0;
         }
-        for(auto c:connected_componet)lvisited[c]=true;
+        for(auto n:connected_componet)
+            if(n.type==1)
+                lvisited[n.index]=true;
+            else
+                bvisited[n.index]=true;
+        connected_componets.push_back(connected_componet);
         connected_componet.clear();
         ans+=min_tot;
     }
