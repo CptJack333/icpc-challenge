@@ -41,7 +41,6 @@ int main(){
         for(;i<=l;i++)if(!visited_li[i])break;
         if(i>l)break;
         vector<int> comp;
-        //需要设置ulimit -s unlimited 允许无限栈大小
         stack<int> li_stack;
         li_stack.push(i);visited_li[i]=true;
         while(!li_stack.empty()){
@@ -76,38 +75,47 @@ int main(){
         set<int> visited;
 
         std::function<bool(int)> recur=[&](int l)->bool{
+            stack<int> recur_stack;
+            recur_stack.push(l);
+//            visited.insert(l);
             //每个节点进来,先判断是不是所有的路径的解都求出来了
             //如果求出来了,就判断是否符合按压次数
             //如果没求出来,求解
             //无论是否求解了,都从所有路径扩散出去
-            if (visited.count(l))return true;
-            visited.insert(l);
+            while(!recur_stack.empty()){
+                auto l=recur_stack.top();
+                recur_stack.pop();
+                if (visited.count(l))continue;
+                visited.insert(l);
 
-            int press_times = (3 - lights[l]) % 3;
-            //获取这个灯关联的两个按钮
-            auto related_button=light_related_button[l];
-            auto but1=*related_button.begin();
-            auto but2=related_button.size()==2?*related_button.rbegin():-1;
-            //获取两个按钮按下的次数
-            auto p1=solution[but1];
-            auto p2=but2!=-1?solution[but2]:0;//如果只有一个按钮,虚拟按钮次数为0
+                int press_times = (3 - lights[l]) % 3;
+                //获取这个灯关联的两个按钮
+                auto related_button = light_related_button[l];
+                auto but1 = *related_button.begin();
+                auto but2 = related_button.size() == 2 ? *related_button.rbegin() : -1;
+                //获取两个按钮按下的次数
+                auto p1 = solution[but1];
+                auto p2 = but2 != -1 ? solution[but2] : 0;//如果只有一个按钮,虚拟按钮次数为0
 
-            if(p1!=-1 && p2 !=-1){
-                if((p1+p2)%3!=press_times)return false;
-            }else{
-                auto& sol=p2==-1?solution[but2]:solution[but1];
-                if(p1==-1)swap(p1,p2);
-                p2=press_times-p1;
-                while(p2<0)p2+=3;
-                sol=p2;
+                if (p1 != -1 && p2 != -1) {
+                    if ((p1 + p2) % 3 != press_times)return false;
+                } else {
+                    auto &sol = p2 == -1 ? solution[but2] : solution[but1];
+                    if (p1 == -1)swap(p1, p2);
+                    p2 = press_times - p1;
+                    while (p2 < 0)p2 += 3;
+                    sol = p2;
+                }
+
+                for (auto l2: button_control_lights[but1])
+                    recur_stack.push(l2);
+//                    if (!recur(l2))return false;
+                if (but2 != -1)
+                    for (auto l2: button_control_lights[but2])
+                        recur_stack.push(l2);
+//                        if (!recur(l2))return false;
+
             }
-
-            for(auto l2:button_control_lights[but1])
-                if(!recur(l2))return false;
-            if(but2!=-1)
-            for(auto l2:button_control_lights[but2])
-                if(!recur(l2))return false;
-
             return true;
         };
 
