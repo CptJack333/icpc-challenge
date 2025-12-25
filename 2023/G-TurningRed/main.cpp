@@ -35,7 +35,7 @@ int main(){
 
     vector<vector<int>> connected_components;
     int light_cnt=0;
-    vector<bool> visited_li(l+1,false);
+    vector<int> visited_li(l+1,false);
     while(light_cnt<l){
         int i=1;
         for(;i<=l;i++)if(!visited_li[i])break;
@@ -75,7 +75,7 @@ int main(){
 //        set<int> visited;
 
         std::function<bool(int)> recur=[&](int ll)->bool{
-            vector<bool> visited(l+1,false);
+            vector<int> visited(l+1,false);
             stack<int> recur_stack;
             recur_stack.push(ll);
 //            visited.insert(l);
