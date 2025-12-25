@@ -111,6 +111,11 @@ int main(){
             if(related_button.size()==2)
                 solution[*related_button.rbegin()]=j;
             if(recur(node(1,li))){
+                if(!found_sol) {
+                    sort(connected_componet.begin(), connected_componet.end(),
+                         [] (const node& a, const node& b) { return a.type < b.type || (a.type==b.type&& a.index<b.index); });
+                    connected_componets.push_back(connected_componet);
+                }
                 found_sol=true;
                 int tot=0;
                 for(int k : solution)
@@ -128,12 +133,11 @@ int main(){
             cout<<"impossible"<<endl;
             return 0;
         }
-        for(auto n:connected_componet)
+        for(auto n:connected_componets.back())
             if(n.type==1)
                 lvisited[n.index]=true;
             else
                 bvisited[n.index]=true;
-        connected_componets.push_back(connected_componet);
         connected_componet.clear();
         ans+=min_tot;
     }
