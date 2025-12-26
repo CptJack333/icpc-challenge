@@ -56,51 +56,58 @@ int main(){
         for(int j=0;j<=2;++j){
             connected_componet.clear();
 
-            std::function<bool(node)> recur = [&](node n)->bool {
-                if (n.type == 1) {
-                    if(light_related_button[n.index].empty() && lights[n.index]!=0) {
-                        return false;
+            auto recur=[&](node nn){
+                stack<node> recur_stack;
+                recur_stack.push(nn);
+                while (!recur_stack.empty()) {
+                    auto n =recur_stack.top();
+                    recur_stack.pop();
+
+                    if (n.type == 1) {
+                        if (light_related_button[n.index].empty() && lights[n.index] != 0) {
+                            return false;
+                        }
+
+                        if (lvisited[n.index])continue;
+                        lvisited[n.index] = true;
+                    } else {
+                        if (bvisited[n.index])continue;
+                        bvisited[n.index] = true;
+                    }
+                    connected_componet.push_back(n);
+
+                    if (n.type == 2) {
+                        for (auto l3: button_control_lights[n.index])
+                            if (!lvisited[l3])
+                                recur_stack.emplace(1, l3);
+                        continue;
                     }
 
-                    if (lvisited[n.index])return true;
-                    lvisited[n.index] = true;
-                } else {
-                    if (bvisited[n.index])return true;
-                    bvisited[n.index] = true;
-                }
-                connected_componet.push_back(n);
+                    int press_times = (3 - lights[n.index]) % 3;
+                    //获取这个灯关联的两个按钮
+                    auto related_button = light_related_button[n.index];
+                    auto but1 = *related_button.begin();
+                    auto but2 = related_button.size() == 2 ? *related_button.rbegin() : -1;
+                    //获取两个按钮按下的次数
+                    auto p1 = solution[but1];
+                    auto p2 = but2 != -1 ? solution[but2] : 0;//如果只有一个按钮,虚拟按钮次数为0
 
-                if(n.type==2){
-                    for(auto l3:button_control_lights[n.index])
-                        if(!lvisited[l3] && !recur(node(1,l3)))
+                    if (p1 != -1 && p2 != -1) {
+                        if ((p1 + p2) % 3 != press_times)
                             return false;
-                    return true;
+                    } else {
+                        auto &sol = p2 == -1 ? solution[but2] : solution[but1];
+                        if (p1 == -1)swap(p1, p2);
+                        p2 = press_times - p1;
+                        while (p2 < 0)p2 += 3;
+                        sol = p2;
+                    }
+
+                    for (auto b: light_related_button[n.index])
+                        if (!bvisited[b])
+                            recur_stack.push(node(2, b));
+
                 }
-
-                int press_times = (3 - lights[n.index]) % 3;
-                //获取这个灯关联的两个按钮
-                auto related_button = light_related_button[n.index];
-                auto but1 = *related_button.begin();
-                auto but2 = related_button.size() == 2 ? *related_button.rbegin() : -1;
-                //获取两个按钮按下的次数
-                auto p1 = solution[but1];
-                auto p2 = but2 != -1 ? solution[but2] : 0;//如果只有一个按钮,虚拟按钮次数为0
-
-                if (p1 != -1 && p2 != -1) {
-                    if ((p1 + p2) % 3 != press_times)
-                        return false;
-                } else {
-                    auto &sol = p2 == -1 ? solution[but2] : solution[but1];
-                    if (p1 == -1)swap(p1, p2);
-                    p2 = press_times - p1;
-                    while (p2 < 0)p2 += 3;
-                    sol = p2;
-                }
-
-                for(auto b:light_related_button[n.index])
-                    if(!bvisited[b] && !recur(node(2,b)))
-                        return false;
-
                 return true;
             };
 
