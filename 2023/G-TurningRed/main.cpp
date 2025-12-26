@@ -48,6 +48,24 @@ int main(){
     for(int li=1;li<=l;++li){
         if(lvisited[li])continue;
 
+        if(light_related_button[li].empty()&& lights[li] != 0){
+            cout<<"impossible"<<endl;
+            return 0;
+        }
+
+        bool single_light=true;
+        for (auto b2:light_related_button[li])
+            for(auto l2:button_control_lights[b2])
+                if(l2!=li){
+                    single_light= false;
+                    break;
+                }
+        if(single_light){
+            int press_times = (3 - lights[li]) % 3;
+            ans+=press_times;
+            continue;
+        }
+
         int min_tot=0x7FFFFFFF;
         bool found_sol=false;
         vector<node> connected_componet;
@@ -64,9 +82,9 @@ int main(){
                     recur_stack.pop();
 
                     if (n.type == 1) {
-                        if (light_related_button[n.index].empty() && lights[n.index] != 0) {
-                            return false;
-                        }
+//                        if (light_related_button[n.index].empty() && lights[n.index] != 0) {
+//                            return false;
+//                        }
 
                         if (lvisited[n.index])continue;
                         lvisited[n.index] = true;
