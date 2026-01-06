@@ -11,8 +11,11 @@ if [[ $1 == "case" ]];then
   ans=$(cat ./data/$2.in |./main)
   if [ "$ans" != "$correct" ];then
     echo "failed"
-    echo "correct " $correct
-    echo "ans " $ans
+    diff <(echo "$ans") <(echo "correct") |less # > diff.txt
+    echo "$ans" > ./data/my_ans
+#    cat diff.txt | less
+#    echo "correct " $correct
+#    echo "ans " $ans
   else
     echo "succ"
   fi
