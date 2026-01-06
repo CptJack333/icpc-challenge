@@ -5,7 +5,7 @@ int main(){
     int t,n,m,p,k;
     cin>>t;
     for(int tc=0;tc<t;++tc){
-        bool cout_test_case=false;
+        bool cout_test_case= true;
         cin>>n>>m;
         if(cout_test_case)
             cout<<"test case "<<tc<<endl<<n<<m<<endl;
@@ -80,6 +80,15 @@ int main(){
                 catnip_planted[*set1.begin()] = true;
                 pot_planted[pi] = true;
             }
+            bool all_plant_should_plant_after_this_pot=true;
+            for(auto cn:set1){
+                if(plant_after[cn]<=pi){all_plant_should_plant_after_this_pot=false;
+                    break;}
+            }
+            if(all_plant_should_plant_after_this_pot){
+                can_do = false;
+                break;
+            }
         }
         if(!can_do) {
             cout << "no" << endl;
@@ -87,20 +96,28 @@ int main(){
         }
 //        检查一颗艹有没有被重复种
 //尝试把没种的艹种了
-        int try_pot=1;
-        vector<bool> try_planted(m+1,false);
-        while(true){
-            if(pot_planted[try_pot]){++try_pot;
-                continue;}
-            for(auto cn:pot_possible_cn[p]){
-                try_planted[cn]=true;
+
+        vector<pair<int,int>> plant_after_sort;
+        for(auto pi:plant_after)
+            plant_after_sort.push_back(make_pair(pi,plant_after_sort.size()+1));
+        auto cmp=[&](const pair<int, int> &a, const pair<int, int> &b) {
+            return a.first<b.first;
+        };
+        sort(plant_after_sort.begin(), plant_after_sort.end(),cmp);
+        int not_planted_count=0;
+        for(int pi=1;pi<=m;++pi){
+            if(!pot_planted[pi])++not_planted_count;
+            for(int pj=1;pj<=pi;++pj){
+                if(pot_planted[pj])continue;
+                auto lb= upper_bound(plant_after_sort.begin(),plant_after_sort.end(), make_pair(not_planted_count,0),cmp);
+                int availabe_catnip=lb-plant_after_sort.begin();
+                if(availabe_catnip<not_planted_count){
+                    can_do=false;
+                    goto fail;
+                }
             }
         }
-        for(int pi=1;pi<=m;++pi){
-            if(pot_planted[pi])continue;
-//            用递归的方法去种，不断反复试验
-            for(auto cn:pot_possible_cn[pi])
-        }
-        cout<<"yes"<<endl;
+        fail:
+        cout<<(can_do?"yes":"no")<<endl;
     }
 }
