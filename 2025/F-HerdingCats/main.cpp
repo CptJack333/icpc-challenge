@@ -87,9 +87,19 @@ int main(){
         }
 //        检查一颗艹有没有被重复种
 //尝试把没种的艹种了
+        int try_pot=1;
+        vector<bool> try_planted(m+1,false);
+        while(true){
+            if(pot_planted[try_pot]){++try_pot;
+                continue;}
+            for(auto cn:pot_possible_cn[p]){
+                try_planted[cn]=true;
+            }
+        }
         for(int pi=1;pi<=m;++pi){
             if(pot_planted[pi])continue;
-
+//            用递归的方法去种，不断反复试验
+            for(auto cn:pot_possible_cn[pi])
         }
         cout<<"yes"<<endl;
     }
