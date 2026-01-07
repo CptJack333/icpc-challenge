@@ -3,17 +3,16 @@ using namespace std;
 
 set<int> set_intersect(vector<set<int>> sets){
     auto set1=sets.front();
-    for(auto ss:sets) {
-        std::set<int> temp_intersection; // 临时变量存储本次交集结果
+    for(const auto& ss:sets) {
+        std::set<int> temp_intersection;
         std::set_intersection(
                 set1.begin(), set1.end(),
                 ss.begin(), ss.end(),
                 std::inserter(temp_intersection, temp_intersection.begin())
         );
-        set1 = std::move(temp_intersection); // 将本次交集结果赋给 set1，用于下次计算
-        if (set1.empty()) { // 提前终止，交集已为空
+        set1 = std::move(temp_intersection);
+        if (set1.empty())
             break;
-        }
     }
     return set1;
 }
@@ -26,9 +25,9 @@ int main(){
         cin>>n>>m;
         if(cout_test_case)
             cout<<"test case "<<tc<<endl<<n<<" "<<m<<endl;
-        vector<int> catnip_lower_bound(m + 1, 0);
-        set<int> key_pots;
-        vector<vector<set<int>>> pot_should_plant(m+1);
+        vector<int> catnip_lower_bound(m + 1, 0);//每颗草应该种在哪个盆或者后面的盆
+        set<int> key_pots;//有猫蹲守的花盆
+        vector<vector<set<int>>> pot_should_plant(m+1);//为了吸引猫蹲在这个盆, 需要用到的草
 //        读入数据，计算猫草lb
         for(int ri=0;ri<n;++ri){
             cin>>p>>k;
@@ -76,6 +75,5 @@ int main(){
             }
 finish:
         cout<<(can_do?"yes":"no")<<endl;
-//        cout<<"tc shit "<<tc<<" " <<(can_do?"yes":"no")<<endl;
     }
 }
