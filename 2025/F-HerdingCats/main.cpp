@@ -47,12 +47,8 @@ int main(){
             if(cout_test_case)
                 cout<<endl;
         }
-//        对关键盆计算应种草集合
-        vector<int> after_count(m+1,0);
         bool can_do=true;
-        //如果一个盆需要多个猫停在这，那需要种一颗对这些猫都吸引的艹
 //        对关键盆计算应种草集合
-        vector<bool> catnip_planted(m+1,false);
         for(auto pi :key_pots){
             auto set1=set_intersect(pot_should_plant[pi]);
 //           过滤应种草集合，去除lb过高的
