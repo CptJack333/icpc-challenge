@@ -57,15 +57,11 @@ int main(){
             if (!child[root].second) {
                 if(child[root].first&&!child[child[root].first].first&&find_min){
                     auto leaf=child[root].first;
-                    parent[leaf]=0;
-                    child[root].first=0;
-                    ret.push_back(leaf);
+                    take_out(leaf);
                     continue;
                 }
-                ret.push_back(root);
-                parent[child[root].first] = 0;
                 auto lch=child[root].first;
-                child[root]={0,0};
+                take_out(root);
                 root = lch;
                 continue;
             }
