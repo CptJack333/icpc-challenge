@@ -85,8 +85,11 @@ int main(){
             }
         }
         reverse(ret.begin(),ret.end());
-        for(auto i:ret)cout<<i<<' ';
-        cout<<endl;
+        stringstream ss;
+        for(auto i:ret)ss<<i<<' ';
+        auto st=ss.str();
+        st.pop_back();
+        cout<<st<<endl;
         find_min=!find_min;
         child=child_copy;
         parent=parent_copy;
