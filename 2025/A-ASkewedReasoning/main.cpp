@@ -32,8 +32,8 @@ int main(){
     }
 
     bool find_min=true;
-    vector<int> ret;
     for(auto rep=0;rep<2;++rep){
+        vector<int> ret;
         int root=1;// 题目条件，ℓi and ri (i < ℓi ≤ n or ℓi = 0; i < ri ≤ n or ri = 0)，说明root是1
         auto child_copy=child;
         auto parent_copy=parent;
@@ -93,7 +93,6 @@ int main(){
         find_min=!find_min;
         child=child_copy;
         parent=parent_copy;
-        ret.clear();
     }
     return 0;
 }
