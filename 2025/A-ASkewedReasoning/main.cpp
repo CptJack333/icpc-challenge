@@ -38,6 +38,21 @@ int main(){
         auto child_copy=child;
         auto parent_copy=parent;
         while (root) {
+            auto take_out=[&](int p){
+                auto par=parent[p];
+                child[par].first=child[p].first;
+                parent[child[p].first]=par;
+                child[p]={0,0};
+                parent[p]=0;
+                ret.push_back(p);
+                p=par;
+                while(p){
+                    auto &ch = child[p];
+                    swap(ch.first, ch.second);
+                    auto par = parent[p];
+                    p=par;
+                }
+            };
 //        root可拔除，还得看看是不是只剩最后两个了
             if (!child[root].second) {
                 if(child[root].first&&!child[child[root].first].first&&find_min){
@@ -60,28 +75,12 @@ int main(){
                 p = child[p].first;
             }
 //        找到了一个叶子结点的父节点，叶子节点也可以拔除,在找最小序列的时候拔叶子
-            auto take_out=[&](int p){
-                auto par=parent[p];
-                child[par].first=child[p].first;
-                parent[child[p].first]=par;
-                child[p]={0,0};
-                parent[p]=0;
-                p=par;
-                while(p){
-                    auto &ch = child[p];
-                    swap(ch.first, ch.second);
-                    auto par = parent[p];
-                    p=par;
-                }
-            };
             if (find_min && child[p].first && !child[child[p].first].first) {
                 auto leaf = child[p].first;
                 take_out(leaf);
-                ret.push_back(leaf);
             } else {
 //            非叶子或者，最大序列的时候，拔枝干上的节点
                 take_out(p);
-                ret.push_back(p);
             }
         }
         reverse(ret.begin(),ret.end());
