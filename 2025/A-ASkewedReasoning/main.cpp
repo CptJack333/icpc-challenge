@@ -18,8 +18,18 @@ int main(){
     function<int(int)> calc_tree_size=[&](int root)->int{
         if(!root)return 0;
         auto [l,r]=child[root];
-        return tree_size[root]=1+calc_tree_size(l)+calc_tree_size(r);
+        auto lsize=calc_tree_size(l), rsize=calc_tree_size(r);
+        if(lsize==-1||rsize==-1)
+            return -1;
+        if(0==lsize&&rsize>0)
+            return -1;
+        return tree_size[root]=1+lsize+rsize;
     };
+    if(calc_tree_size(1)==-1){
+        cout<<"impossible"<<endl;
+        return 0;
+    }
+
     int root=1;// 题目条件，ℓi and ri (i < ℓi ≤ n or ℓi = 0; i < ri ≤ n or ri = 0)，说明root是1
     int min_spine=0x7FFFFFFF;
 //    从左边的脊梁骨里面选出一个最小/大的节点，并且不能有右子树
