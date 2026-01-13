@@ -5,7 +5,7 @@ using namespace std;
 int main(){
     int n;
     cin>>n;
-    vector<int> tree_size(n,0);
+    vector<int> tree_size(n+1,0);
     vector<pair<int,int>> child(n+1);
     vector<int> parent(n+1,0);
     for(int i=1;i<=n;++i){
