@@ -16,20 +16,6 @@ int main(){
         parent[r]=i;
     }
 //    甚至可能不用算每个子树size，拔除的过程中判断就行了
-    function<int(int)> calc_tree_size=[&](int root)->int{
-        if(!root)return 0;
-        auto [l,r]=child[root];
-        auto lsize=calc_tree_size(l), rsize=calc_tree_size(r);
-        if(lsize==-1||rsize==-1)
-            return -1;
-        if(0==lsize&&rsize>0)
-            return -1;
-        return tree_size[root]=1+lsize+rsize;
-    };
-    if(calc_tree_size(1)==-1){
-        cout<<"impossible"<<endl;
-        return 0;
-    }
 
     bool find_min=true;
     for(auto rep=0;rep<2;++rep){
@@ -39,6 +25,11 @@ int main(){
         auto parent_copy=parent;
         while (root) {
             auto take_out=[&](int p){
+                auto ch =child[p];
+                if(ch.second&&!ch.first){
+                    cout<<"impossible"<<endl;
+                    exit(0);
+                }
                 auto par=parent[p];
                 child[par].first=child[p].first;
                 parent[child[p].first]=par;
@@ -49,8 +40,7 @@ int main(){
                 while(p){
                     auto &ch = child[p];
                     swap(ch.first, ch.second);
-                    auto par = parent[p];
-                    p=par;
+                    p=parent[p];
                 }
             };
 //        root可拔除，还得看看是不是只剩最后两个了
