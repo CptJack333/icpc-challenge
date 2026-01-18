@@ -43,6 +43,11 @@ int main(){
                     p=parent[p];
                 }
             };
+            auto [l,r]=child[root];
+            if(!l&&r){
+                cout<<"impossible"<<endl;
+                exit(0);
+            }
 //        root可拔除，还得看看是不是只剩最后两个了
             if (!child[root].second) {
                 if(child[root].first&&!child[child[root].first].first&&find_min){
@@ -58,7 +63,15 @@ int main(){
             auto p = root;
             //找到left spine上第一个右子树为空 的节点，这个节点可以拔出
             while (child[p].second) {
+                if(!child[p].first){
+                    cout<<"impossible"<<endl;
+                    exit(0);
+                }
                 p = child[p].first;
+            }
+            if(child[p].second&&!child[p].first){
+                cout<<"impossible"<<endl;
+                exit(0);
             }
 //        找到了一个叶子结点的父节点，叶子节点也可以拔除,在找最小序列的时候拔叶子
             if (find_min && child[p].first && !child[child[p].first].first) {
