@@ -15,7 +15,6 @@ int main(){
         parent[l]=i;
         parent[r]=i;
     }
-//    甚至可能不用算每个子树size，拔除的过程中判断就行了
 
     bool find_min=true;
     for(auto rep=0;rep<2;++rep){
