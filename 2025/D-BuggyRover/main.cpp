@@ -21,8 +21,10 @@ int main(){
         orders.push_back(first_order);
     }while(next_permutation(first_order.begin(), first_order.end()));
     int min_hit_times=0x7FFFFFFF;
-    int rr=sr , cc=sc;
     for(auto order:orders){
+        int rr=sr , cc=sc;
+//        if (order=="NESW")
+//            asm("int $0x3");
         int hit_times=0;
         for(auto s:path){
             // auto matched=false;
