@@ -15,11 +15,11 @@ int main(){
         }
     string path;
     cin>>path;
-    string order="ENSW";
+    string first_order="ENSW";
     vector<string> orders;
     do{
-        orders.push_back(order);
-    }while(next_permutation(order.begin(),order.end()));
+        orders.push_back(first_order);
+    }while(next_permutation(first_order.begin(), first_order.end()));
     int min_hit_times=0x7FFFFFFF;
     int rr=sr , cc=sc;
     for(auto order:orders){
