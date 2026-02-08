@@ -46,9 +46,10 @@ int main(){
                 no_valid_order=false;
                 break;
             }
-        if(no_valid_order)
+        if(no_valid_order){
             ++hit_times;
             valid_orders=vector<bool>(24,true);
+        }
     }
     cout<<hit_times<<endl;
     return 0;
