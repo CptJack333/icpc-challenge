@@ -33,13 +33,11 @@ int main(){
             for(auto o:order){
                 int nr=rr+(o=='S'?1:(o=='N'?-1:0)), nc=cc+(o=='E'?1:(o=='W'?-1:0));
                 if(nr>=r ||nr<0 || nc>=c || nc<0)continue;
-                if(g[nr][nc]=='.'){
-                    if(o!=s){
-                        valid_orders[oi]=false;
-                    }
-                    break;
-                    // matched=true;
+                if(g[nr][nc]=='#')continue;
+                if(pr!=nr || pc!=nc){
+                    valid_orders[oi]=false;
                 }
+                break;
             }
         }
         bool no_valid_order=true;
