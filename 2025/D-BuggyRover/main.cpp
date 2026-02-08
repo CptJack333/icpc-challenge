@@ -26,8 +26,8 @@ int main(){
     for(auto p:path){
 //        if (order=="NESW")
 //            asm("int $0x3");
-        pr=pr+(p=='S'?1:(p=='N'?-1:0));
-        pc=pc+(p=='E'?1:(p=='W'?-1:0));
+        int npr=pr+(p=='S'?1:(p=='N'?-1:0));
+        int npc=pc+(p=='E'?1:(p=='W'?-1:0));
         for(int oi=0;oi<24;++oi){
             auto order=orders[oi];
             // auto matched=false;
@@ -36,7 +36,7 @@ int main(){
                 int nc=pc+(o=='E'?1:(o=='W'?-1:0));
                 if(nr>=r ||nr<0 || nc>=c || nc<0)continue;
                 if(g[nr][nc]=='#')continue;
-                if(pr!=nr || pc!=nc){
+                if(npr!=nr || npc!=nc){
                     valid_orders[oi]=false;
                 }
                 break;
@@ -52,6 +52,8 @@ int main(){
             ++hit_times;
             valid_orders=vector<bool>(24,true);
         }
+        pr=npr;
+        pc=npc;
     }
     cout<<hit_times<<endl;
     return 0;
