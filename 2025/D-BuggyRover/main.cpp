@@ -20,28 +20,35 @@ int main(){
     do{
         orders.push_back(first_order);
     }while(next_permutation(first_order.begin(), first_order.end()));
-    int min_hit_times=0x7FFFFFFF;
-    for(auto order:orders){
+    int hit_times=0;
+    vector<bool> valid_orders(24,true);
+    for(auto s:path){
         int rr=sr , cc=sc;
 //        if (order=="NESW")
 //            asm("int $0x3");
-        int hit_times=0;
-        for(auto s:path){
+        for(int oi=0;oi<24;++oi){
+            auto order=orders[oi];
             // auto matched=false;
             for(auto o:order){
                 int nr=rr+(o=='S'?1:(o=='N'?-1:0)), nc=cc+(o=='E'?1:(o=='W'?-1:0));
                 if(nr>=r ||nr<0 || nc>=c || nc<0)continue;
                 if(g[nr][nc]=='.'){
                     if(o!=s)
-                        ++hit_times;
+                        valid_orders[oi]=false;
                     // matched=true;
-                    break;
                 }
             }
-
         }
-        min_hit_times=min(min_hit_times,hit_times);
+        bool no_valid_order=true;
+        for(auto b:valid_orders)
+            if(b){
+                no_valid_order=false;
+                break;
+            }
+        if(no_valid_order)
+            ++hit_times;
+            valid_orders=vector<bool>(24,true);
     }
-    cout<<min_hit_times<<endl;
+    cout<<hit_times<<endl;
     return 0;
 }

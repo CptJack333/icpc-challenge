@@ -4,7 +4,7 @@ project(untitled)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(exe
-        ../2025/A-ASkewedReasoning/main.cpp
+        ../2025/D-BuggyRover/main.cpp
 )
 
 #add_executable(exe3
