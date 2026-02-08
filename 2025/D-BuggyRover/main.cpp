@@ -33,8 +33,10 @@ int main(){
                 int nr=rr+(o=='S'?1:(o=='N'?-1:0)), nc=cc+(o=='E'?1:(o=='W'?-1:0));
                 if(nr>=r ||nr<0 || nc>=c || nc<0)continue;
                 if(g[nr][nc]=='.'){
-                    if(o!=s)
+                    if(o!=s){
                         valid_orders[oi]=false;
+                    }
+                    break;
                     // matched=true;
                 }
             }
