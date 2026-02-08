@@ -22,10 +22,11 @@ int main(){
     }while(next_permutation(first_order.begin(), first_order.end()));
     int hit_times=0;
     vector<bool> valid_orders(24,true);
-    for(auto s:path){
-        int rr=sr , cc=sc;
+    int rr=sr , cc=sc;
+    for(auto p:path){
 //        if (order=="NESW")
 //            asm("int $0x3");
+        int pr=rr+(p=='S'?1:(p=='N'?-1:0)), pc=cc+(p=='E'?1:(p=='W'?-1:0));
         for(int oi=0;oi<24;++oi){
             auto order=orders[oi];
             // auto matched=false;
