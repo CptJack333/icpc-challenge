@@ -28,20 +28,23 @@ int main(){
 //            asm("int $0x3");
         int npr=pr+(p=='S'?1:(p=='N'?-1:0));
         int npc=pc+(p=='E'?1:(p=='W'?-1:0));
-        for(int oi=0;oi<24;++oi){
-            auto order=orders[oi];
-            // auto matched=false;
-            for(auto o:order){
-                int nr=pr+(o=='S'?1:(o=='N'?-1:0));
-                int nc=pc+(o=='E'?1:(o=='W'?-1:0));
-                if(nr>=r ||nr<0 || nc>=c || nc<0)continue;
-                if(g[nr][nc]=='#')continue;
-                if(npr!=nr || npc!=nc){
-                    valid_orders[oi]=false;
+        auto filter_orders=[&](){
+            for (int oi = 0; oi < 24; ++oi) {
+                auto order = orders[oi];
+                // auto matched=false;
+                for (auto o: order) {
+                    int nr = pr + (o == 'S' ? 1 : (o == 'N' ? -1 : 0));
+                    int nc = pc + (o == 'E' ? 1 : (o == 'W' ? -1 : 0));
+                    if (nr >= r || nr < 0 || nc >= c || nc < 0)continue;
+                    if (g[nr][nc] == '#')continue;
+                    if (npr != nr || npc != nc) {
+                        valid_orders[oi] = false;
+                    }
+                    break;
                 }
-                break;
             }
-        }
+        };
+        filter_orders();
         bool no_valid_order=true;
         for(auto b:valid_orders)
             if(b){
@@ -51,6 +54,7 @@ int main(){
         if(no_valid_order){
             ++hit_times;
             valid_orders=vector<bool>(24,true);
+            filter_orders();
         }
         pr=npr;
         pc=npc;
