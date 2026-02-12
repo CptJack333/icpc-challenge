@@ -64,7 +64,7 @@ void merge_components(int a, int b){
     intersecting_component[a].erase(b);
     intersecting_component[b].clear();
     components[b]=a;
-    component_size[a]+=merged_component_size;
+    component_size[a]=merged_component_size;
     component_size[b]=0;
 }
 
