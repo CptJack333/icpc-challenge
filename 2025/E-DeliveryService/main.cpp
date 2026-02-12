@@ -67,7 +67,8 @@ int main(){
     component_size.resize(n + 1);
     intersecting_component.resize(n+1);
     for(int i=1;i<=n;++i)
-        components[i]=i;
+        components[i]=i,
+        component_size[i]=1;
 
     for(int i=1;i<=m;++i){
         int dep,arr;
