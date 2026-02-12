@@ -2,33 +2,34 @@
 
 using namespace std;
 
+vector<int> components;//每个城市所属的连通分量
+vector<int> component_size;
+
+long long current_city_pairs=0;
+vector<map<int,int>> intersecting_component;//与下标的分量有共同城市节点的分量，value是共同城市节点的数目
+
 long long Cn2(long long n){
     if(n<2)return 0;
     return n*(n-1)/2;
 }
 
-vector<int> componets;//每个城市所属的连通分量
-vector<int> component_size;
-
 int find_componet_head(int c){
-    if(componets[c]==c)return c;
-    componets[c]= find_componet_head(componets[c]);
-    return componets[c];
+    if(components[c] == c)return c;
+    components[c]= find_componet_head(components[c]);
+    return components[c];
 }
-
-long long current_city_pairs=0;
-vector<map<int,int>> intersecting_component;//与下标的分量有共同城市节点的分量，value是共同城市节点的数目
 
 void merge_componets(int a, int b){
     a= find_componet_head(a);
     b= find_componet_head(b);
 
+    //根据大小交换ab，使得size小的往大的merge，不做这步运行会很慢！
+    if(component_size[a]<component_size[b])
+        swap(a,b);
+
     auto a_size=component_size[a];
     auto b_size=component_size[b];
     auto ab_intersect_size=intersecting_component[a].count(b)? intersecting_component[a][b]:0;
-
-
-    //todo 交换ab，使得size小的往大的merge
 
     current_city_pairs-= Cn2(a_size);
     current_city_pairs-=Cn2(b_size);
@@ -54,7 +55,7 @@ void merge_componets(int a, int b){
 //        调整数据结构，达到merge效果
     intersecting_component[a].erase(b);
     intersecting_component[b].clear();
-    componets[b]=a;
+    components[b]=a;
     component_size[a]+=component_size[b];
     component_size[b]=0;
 }
@@ -62,11 +63,11 @@ void merge_componets(int a, int b){
 int main(){
     int n,m;
     cin>>n>>m;
-    componets.resize(n+1);
+    components.resize(n + 1);
     component_size.resize(n + 1);
     intersecting_component.resize(n+1);
     for(int i=1;i<=n;++i)
-        componets[i]=i;
+        components[i]=i;
 
     for(int i=1;i<=m;++i){
         int dep,arr;
