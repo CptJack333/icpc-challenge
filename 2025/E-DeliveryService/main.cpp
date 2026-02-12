@@ -2,7 +2,7 @@
 
 using namespace std;
 
-vector<int> components;//每个城市所属的连通分量
+vector<int> components;//每个节点所属的连通分量
 vector<int> component_size;
 
 long long current_city_pairs=0;
@@ -31,9 +31,9 @@ void merge_components(int a, int b){
 
     auto a_size=component_size[a];
     auto b_size=component_size[b];
-//    auto ab_intersect_size=intersecting_component[a].count(b)? intersecting_component[a][b]:0;
     auto ab_intersect_size=intersecting_component[a][b];
 
+//    合并后调整城市对的数量
     current_city_pairs-= Cn2(a_size);
     current_city_pairs-=Cn2(b_size);
     current_city_pairs+=Cn2(ab_intersect_size);//容斥原理
@@ -46,7 +46,6 @@ void merge_components(int a, int b){
 
     //检查b的intersect compo，进行处理
     for(auto [c,b_inter_c_size]:intersecting_component[b]){
-//        auto a_inter_c_size=intersecting_component[a].count(c)?intersecting_component[a][c]:0;
         auto a_inter_c_size=intersecting_component[a][c];
 
         //根据容斥原理重新调整merge后的新a和c的城市对
@@ -78,9 +77,7 @@ int main(){
     for(int i=1;i<=2*n;++i)
         components[i]=i,
         component_size[i]=1;
-    // Initialize overlaps
-    // Each city i connects i_out and i_in via its existence.
-    // So initially, component i (out) and component i+n (in) have overlap of 1 (city i itself).
+//    初始的时候，每个城市暗含自己的出节点和入节点是连通的，但连通分量只能按1个城市来计算
     for(int i=1;i<=n;++i){
         intersecting_component[i][i+n]=1;
         intersecting_component[i+n][i]=1;
