@@ -6,7 +6,9 @@ vector<int> components;//每个节点所属的连通分量
 vector<int> component_size;
 
 long long current_city_pairs=0;
-vector<map<int,int>> intersecting_component;//与下标的分量有共同城市节点的分量，value是共同城市节点的数目
+// 两个连通分量一个连接城市的出节点，一个连接入节点，导致了两个连通分量其实是不通的。这个数据结构就是存储任意两个连通分量通过这种情况，所关联的城市数量
+// vector下标是节点下标，map key是连通分量的下标，value是关联的城市的数量
+vector<map<int,int>> intersecting_component_related_city_num;
 
 long long Cn2(long long n){
     if(n<2)return 0;
@@ -26,12 +28,12 @@ void merge_components(int a, int b){
     if(a==b)return;
 
     //根据大小交换ab，使得size小的往大的merge，不做这步运行会很慢！
-    if(intersecting_component[a].size()<intersecting_component[b].size())
+    if(intersecting_component_related_city_num[a].size() < intersecting_component_related_city_num[b].size())
         swap(a,b);
 
     auto a_size=component_size[a];
     auto b_size=component_size[b];
-    auto ab_intersect_size=intersecting_component[a][b];
+    auto ab_intersect_size=intersecting_component_related_city_num[a][b];
 
 //    合并后调整城市对的数量
     current_city_pairs-= Cn2(a_size);
@@ -41,12 +43,12 @@ void merge_components(int a, int b){
     auto merged_component_size= a_size + b_size - ab_intersect_size;
     current_city_pairs+=Cn2(merged_component_size);
 
-    intersecting_component[a].erase(b);
-    intersecting_component[b].erase(a);
+    intersecting_component_related_city_num[a].erase(b);
+    intersecting_component_related_city_num[b].erase(a);
 
     //检查b的intersect compo，进行处理
-    for(auto [c,b_inter_c_size]:intersecting_component[b]){
-        auto a_inter_c_size=intersecting_component[a][c];
+    for(auto [c,b_inter_c_size]:intersecting_component_related_city_num[b]){
+        auto a_inter_c_size=intersecting_component_related_city_num[a][c];
 
         //根据容斥原理重新调整merge后的新a和c的城市对
         current_city_pairs-= Cn2(a_inter_c_size+b_inter_c_size);//减去current_city_pairs+=Cn2(merged_component_size)里面多计算了的
@@ -54,14 +56,14 @@ void merge_components(int a, int b){
         current_city_pairs+=Cn2(b_inter_c_size);
 
 //        调整数据结构，达到merge效果
-        intersecting_component[a][c]+=b_inter_c_size;
-        intersecting_component[c].erase(b);
-        intersecting_component[c][a]=intersecting_component[a][c];
+        intersecting_component_related_city_num[a][c]+=b_inter_c_size;
+        intersecting_component_related_city_num[c].erase(b);
+        intersecting_component_related_city_num[c][a]=intersecting_component_related_city_num[a][c];
     }
 
 //        调整数据结构，达到merge效果
-    intersecting_component[a].erase(b);
-    intersecting_component[b].clear();
+    intersecting_component_related_city_num[a].erase(b);
+    intersecting_component_related_city_num[b].clear();
     components[b]=a;
     component_size[a]=merged_component_size;
     component_size[b]=0;
@@ -73,14 +75,15 @@ int main(){
     //下标1-n是出节点，下标n+1-2n是入节点
     components.resize(2*n + 1);
     component_size.resize(2*n + 1);
-    intersecting_component.resize(2*n+1);
+    intersecting_component_related_city_num.resize(2 * n + 1);
+//    初始每个出/入节点自成一个连通分量
     for(int i=1;i<=2*n;++i)
         components[i]=i,
         component_size[i]=1;
 //    初始的时候，每个城市暗含自己的出节点和入节点是连通的，但连通分量只能按1个城市来计算
     for(int i=1;i<=n;++i){
-        intersecting_component[i][i+n]=1;
-        intersecting_component[i+n][i]=1;
+        intersecting_component_related_city_num[i][i + n]=1;
+        intersecting_component_related_city_num[i + n][i]=1;
     }
 
 
