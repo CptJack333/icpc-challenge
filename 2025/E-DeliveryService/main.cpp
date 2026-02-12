@@ -23,13 +23,16 @@ void merge_componets(int a, int b){
     a= find_componet_head(a);
     b= find_componet_head(b);
 
+    if(a==b)return;
+
     //根据大小交换ab，使得size小的往大的merge，不做这步运行会很慢！
-    if(component_size[a]<component_size[b])
+    if(intersecting_component[a].size()<intersecting_component[b].size())
         swap(a,b);
 
     auto a_size=component_size[a];
     auto b_size=component_size[b];
-    auto ab_intersect_size=intersecting_component[a].count(b)? intersecting_component[a][b]:0;
+//    auto ab_intersect_size=intersecting_component[a].count(b)? intersecting_component[a][b]:0;
+    auto ab_intersect_size=intersecting_component[a][b];
 
     current_city_pairs-= Cn2(a_size);
     current_city_pairs-=Cn2(b_size);
@@ -39,7 +42,8 @@ void merge_componets(int a, int b){
 
     //检查b的intersect compo，进行处理
     for(auto [c,b_inter_c_size]:intersecting_component[b]){
-        auto a_inter_c_size=intersecting_component[a].count(c)?intersecting_component[a][c]:0;
+//        auto a_inter_c_size=intersecting_component[a].count(c)?intersecting_component[a][c]:0;
+        auto a_inter_c_size=intersecting_component[a][c];
 
         //根据容斥原理重新调整merge后的新a和c的城市对
         current_city_pairs-= Cn2(a_inter_c_size+b_inter_c_size);//减去current_city_pairs+=Cn2(merged_componet_size)里面多计算了的
@@ -63,18 +67,27 @@ void merge_componets(int a, int b){
 int main(){
     int n,m;
     cin>>n>>m;
-    components.resize(n + 1);
-    component_size.resize(n + 1);
-    intersecting_component.resize(n+1);
-    for(int i=1;i<=n;++i)
+    //下标1-n是出节点，下标n+1-2n是入节点
+    components.resize(2*n + 1);
+    component_size.resize(2*n + 1);
+    intersecting_component.resize(2*n+1);
+    for(int i=1;i<=2*n;++i)
         components[i]=i,
         component_size[i]=1;
+    // Initialize overlaps
+    // Each city i connects i_out and i_in via its existence.
+    // So initially, component i (out) and component i+n (in) have overlap of 1 (city i itself).
+    for(int i=1;i<=n;++i){
+        intersecting_component[i][i+n]=1;
+        intersecting_component[i+n][i]=1;
+    }
+
 
     for(int i=1;i<=m;++i){
         int dep,arr;
         cin>>dep>>arr;
 
-        merge_componets(dep,arr);
+        merge_componets(dep,arr+n);
 
         cout<<current_city_pairs<<endl;
     }
