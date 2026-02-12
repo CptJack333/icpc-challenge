@@ -13,15 +13,15 @@ long long Cn2(long long n){
     return n*(n-1)/2;
 }
 
-int find_componet_head(int c){
+int find_component_head(int c){
     if(components[c] == c)return c;
-    components[c]= find_componet_head(components[c]);
+    components[c]= find_component_head(components[c]);
     return components[c];
 }
 
-void merge_componets(int a, int b){
-    a= find_componet_head(a);
-    b= find_componet_head(b);
+void merge_components(int a, int b){
+    a= find_component_head(a);
+    b= find_component_head(b);
 
     if(a==b)return;
 
@@ -37,8 +37,12 @@ void merge_componets(int a, int b){
     current_city_pairs-= Cn2(a_size);
     current_city_pairs-=Cn2(b_size);
     current_city_pairs+=Cn2(ab_intersect_size);//容斥原理
-    auto merged_componet_size=a_size+b_size-ab_intersect_size;
-    current_city_pairs+=Cn2(merged_componet_size);
+
+    auto merged_component_size= a_size + b_size - ab_intersect_size;
+    current_city_pairs+=Cn2(merged_component_size);
+
+    intersecting_component[a].erase(b);
+    intersecting_component[b].erase(a);
 
     //检查b的intersect compo，进行处理
     for(auto [c,b_inter_c_size]:intersecting_component[b]){
@@ -46,7 +50,7 @@ void merge_componets(int a, int b){
         auto a_inter_c_size=intersecting_component[a][c];
 
         //根据容斥原理重新调整merge后的新a和c的城市对
-        current_city_pairs-= Cn2(a_inter_c_size+b_inter_c_size);//减去current_city_pairs+=Cn2(merged_componet_size)里面多计算了的
+        current_city_pairs-= Cn2(a_inter_c_size+b_inter_c_size);//减去current_city_pairs+=Cn2(merged_component_size)里面多计算了的
         current_city_pairs+=Cn2(a_inter_c_size);//这两个是上面double count了的，加回来
         current_city_pairs+=Cn2(b_inter_c_size);
 
@@ -60,7 +64,7 @@ void merge_componets(int a, int b){
     intersecting_component[a].erase(b);
     intersecting_component[b].clear();
     components[b]=a;
-    component_size[a]+=component_size[b];
+    component_size[a]+=merged_component_size;
     component_size[b]=0;
 }
 
@@ -87,7 +91,7 @@ int main(){
         int dep,arr;
         cin>>dep>>arr;
 
-        merge_componets(dep,arr+n);
+        merge_components(dep,arr+n);
 
         cout<<current_city_pairs<<endl;
     }
