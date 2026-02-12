@@ -10,6 +10,7 @@ if [[ $1 == "case" ]];then
   correct=$(cat ./data/$2.ans)
   ans=$(cat ./data/$2.in |./main)
   if [ "$ans" != "$correct" ];then
+    echo -e "\033[31mfailed\033[0m"
     echo "failed"
     diff <(echo "$ans") <(echo "correct") |less # > diff.txt
     echo "$ans" > ./data/my_ans
@@ -17,7 +18,7 @@ if [[ $1 == "case" ]];then
 #    echo "correct " $correct
 #    echo "ans " $ans
   else
-    echo "succ"
+    echo -e "\033[32msucc\033[0m"
   fi
   exit
 fi
@@ -40,12 +41,12 @@ for inf in $input;do
   echo "$ans" > ./data/my_ans
   correct=$(cat ./data/$ans_filename)
   if [ "$ans" != "$correct" ];then
-    echo "failed"
+    echo -e "\033[31mfailed\033[0m"
 #    echo "correct " $correct
 #    echo "ans " $ans
 #    exit
   else
-    echo "succ"
+    echo -e "\033[32msucc\033[0m"
   fi
   count=$(( $count + 1 ))
 done
