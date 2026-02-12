@@ -92,12 +92,12 @@ void merge_sets(int a, int b) {
             }
             current_ans += nC2(count);
 
-            // Update map A
-            overlaps[a][k] += count;
 
             // Apply new subtraction term for (A, K)
-            current_ans -= nC2(overlaps[a][k]);
+            current_ans -= nC2(overlaps[a][k]+count);
 
+            // Update map A
+            overlaps[a][k] += count;
             // Update back-reference in K
             // K used to know about B, now it must know about A
             overlaps[k].erase(b);
