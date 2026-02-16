@@ -21,7 +21,7 @@ int main() {
     int T, X, Y, N, M, A, B, C;
     for (cin >> T; T--;) {
         cin >> X >> Y >> N >> M;
-        vector<int64_t> vx(N), vy(N), vz(N);
+        vector<int64_t> vx(N), vy(N), vz(N);// 三角形顶点坐标和高度
         for (int i = 0; i < N; i++) cin >> vx[i] >> vy[i] >> vz[i];
 
         vector<Edge> e;
@@ -35,10 +35,10 @@ int main() {
 
         vector<tuple<int64_t,bool,int,Link>> events;
         for (int i = 0; i < M; i++) {
-            cin >> A >> B >> C; A--; B--; C--;
-            while (vz[A] > vz[B] || vz[A] > vz[C]) { swap(A, B); swap(B, C); }
+            cin >> A >> B >> C; A--; B--; C--;//每个三角形的顶点,下标从0开始
+            while (vz[A] > vz[B] || vz[A] > vz[C]) { swap(A, B); swap(B, C); }//确保A的高度最低
             bool flip = false;
-            if (vz[B] > vz[C]) { swap(B, C); flip = true; }
+            if (vz[B] > vz[C]) { swap(B, C); flip = true; }//高度顺序ABC
             double mx = vx[A] + (vx[C]-vx[A])*(vz[B]-vz[A])/double(vz[C]-vz[A]);
             double my = vy[A] + (vy[C]-vy[A])*(vz[B]-vz[A])/double(vz[C]-vz[A]);
             double ml = hypot(mx-vx[B], my-vy[B]);
