@@ -24,6 +24,7 @@ for ifi in input_files:
     f=open('./data/'+anfi, 'r')
     lines = f.readlines()
 
+    total_failed_num=0
     # lines和outlines逐行比对，每一行都是一个浮点数，如果相差大于1e-3，打印failed
     for i in range(len(lines)):
         line = lines[i].strip()
@@ -36,7 +37,9 @@ for ifi in input_files:
                 print(line)
                 print("ans")
                 print(outlines[i])
-                exit(0)
+                total_failed_num+=1
+                if total_failed_num>=10:
+                    exit(0)
             continue
         f1 = float(line)
         f2 = float(outlines[i])
