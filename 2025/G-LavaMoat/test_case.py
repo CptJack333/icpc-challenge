@@ -11,12 +11,14 @@ for ifi in input_files:
     #打开data/a.in
     # 去掉ifi的后缀.in
     fname = ifi[:-3]
+    print(fname)
 
     #运行cat ifi | ./main，并获取输出
     cmd = "cat ./data/"+ifi+" | ./main"
     out = os.popen(cmd).read()
     #out按每一行划分成数组
     outlines = out.splitlines()
+    # print(outlines)
 
     anfi = fname+".ans"
     f=open('./data/'+anfi, 'r')
@@ -29,19 +31,24 @@ for ifi in input_files:
             if outlines[i] != line:
                 # 输出红色的failed
                 print("\033[91mfailed\033[0m")
-                print("line "+str(i))
+                print("test case "+str(i))
                 print("correct")
                 print(line)
                 print("ans")
                 print(outlines[i])
+                exit(0)
+            continue
         f1 = float(line)
         f2 = float(outlines[i])
         if(abs(f1-f2)>1e-3):
-            print("failed")
+            print("\033[91mfailed\033[0m")
             print("correct")
             print(f1)
             print("ans")
             print(f2)
+            exit(0)
+
+    # exit(0)
 
 # 输出绿色的succ
 print("\033[92msucc\033[0m")
