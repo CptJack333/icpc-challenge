@@ -48,7 +48,7 @@ for ifi in input_files:
             print(f2)
             exit(0)
 
+    # 输出绿色的succ
+    print("\033[92msucc\033[0m")
     # exit(0)
 
-# 输出绿色的succ
-print("\033[92msucc\033[0m")
