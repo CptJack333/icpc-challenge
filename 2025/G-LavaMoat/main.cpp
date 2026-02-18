@@ -2,14 +2,14 @@
 using namespace std;
 
 struct Link {
-    int ei1, ei2;
+    int edge_index1, edge_index2;
     double fz, fc;
     bool operator<(const Link& l) const { return false; }
     Link operator+(const Link& l) const {
-        assert(ei2 == l.ei1);
-        return Link{ei1, l.ei2, fz+l.fz, fc+l.fc};
+        assert(edge_index2 == l.edge_index1);
+        return Link{edge_index1, l.edge_index2, fz + l.fz, fc + l.fc};
     }
-    Link rev() const { return Link{ei2, ei1, fz, fc}; }
+    Link rev() const { return Link{edge_index2, edge_index1, fz, fc}; }
 };
 
 struct Edge {
@@ -24,16 +24,16 @@ int main() {
         vector<int64_t> vx(N), vy(N), vz(N);// 三角形顶点坐标和高度
         for (int i = 0; i < N; i++) cin >> vx[i] >> vy[i] >> vz[i];
 
-        vector<Edge> e;
-        map<pair<int,int>, int> ei;
+        vector<Edge> edges;
+        map<pair<int,int>, int> edge_index;
         auto edge_idx = [&](int a, int b) {
-            if (ei.count({a, b})) return ei[{a, b}];
-            int ret = ei[{a, b}] = e.size();
-            e.push_back(Edge{a: a, b: b, border: vx[a] == 0 && vx[b] == 0 ? 1 : vx[a] == X && vx[b] == X ? 2 : 0});
+            if (edge_index.count({a, b})) return edge_index[{a, b}];
+            int ret = edge_index[{a, b}] = edges.size();
+            edges.push_back(Edge{a: a, b: b, border: vx[a] == 0 && vx[b] == 0 ? 1 : vx[a] == X && vx[b] == X ? 2 : 0});
             return ret;
         };
 
-        vector<tuple<int64_t,bool,int,Link>> events;
+        vector<tuple<int64_t,bool,int,Link>> events; //触发高度、 操作类型、 关联顶点、 等高线片段
         for (int i = 0; i < M; i++) {
             cin >> A >> B >> C; A--; B--; C--;//每个三角形的顶点,下标从0开始
             while (vz[A] > vz[B] || vz[A] > vz[C]) { swap(A, B); swap(B, C); }//确保A的高度最低
@@ -41,13 +41,13 @@ int main() {
             if (vz[B] > vz[C]) { swap(B, C); flip = true; }//高度顺序ABC
             double mx = vx[A] + (vx[C]-vx[A])*(vz[B]-vz[A])/double(vz[C]-vz[A]);
             double my = vy[A] + (vy[C]-vy[A])*(vz[B]-vz[A])/double(vz[C]-vz[A]);
-            double ml = hypot(mx-vx[B], my-vy[B]);
+            double ml = hypot(mx-vx[B], my-vy[B]);//AC上一点连接B的等高线的长度
 
             for (int j = 0; j < 2; j++) {
                 int lo = j?B:A, hi = j?C:B, zero=j?C:A;
                 double fz = ml / (vz[B]-vz[zero]), fc = -fz * vz[zero];
                 Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc};
-                if (flip) swap(link.ei1, link.ei2);
+                if (flip) swap(link.edge_index1, link.edge_index2);
                 events.push_back({vz[lo], true , lo, link});
                 events.push_back({vz[hi], false, hi, link});
             }
@@ -56,20 +56,20 @@ int main() {
 
         double ret = 1e18;
         int maxskip = 0;
-        for (int ei = 0; ei < e.size(); ei++) {
+        for (int ei = 0; ei < edges.size(); ei++) {
             do {
-                e[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0});
-                e[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0});
+                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0});
+                edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0});
             } while (rand()%2);
         }
         function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {
-            auto const& s = e[ei].skip[dir];
+            auto const& s = edges[ei].skip[dir];
             maxskip = max<int>(maxskip, s.size());
-            if (s[h].ei2 == rep) return Link{ei, ei, 1e50, 1e50};  // cycle
-            while (h+1 < s.size() && s[h+1].ei2 != -1) { h++; rep = ei; }
-            while (h > 0 && s[h].ei2 == -1) h--;
-            if (s[h].ei2 == -1) return Link{ei, ei, 0.0, 0.0};
-            return s[h] + follow(s[h].ei2, dir, h, rep);
+            if (s[h].edge_index2 == rep) return Link{ei, ei, 1e50, 1e50};  // cycle
+            while (h+1 < s.size() && s[h+1].edge_index2 != -1) { h++; rep = ei; }
+            while (h > 0 && s[h].edge_index2 == -1) h--;
+            if (s[h].edge_index2 == -1) return Link{ei, ei, 0.0, 0.0};
+            return s[h] + follow(s[h].edge_index2, dir, h, rep);
         };
 
         for (int i = 0; i < events.size(); i++) {
@@ -84,9 +84,9 @@ int main() {
                     if (z2 != z || add2) break;
                     for (int dir = 0; dir < 2; dir++) {
                         link2 = link2.rev();
-                        if (e[link2.ei2].a == zv || e[link2.ei2].b == zv) continue;
-                        Link link3 = follow(link2.ei1, dir, 0, link2.ei1);
-                        double& b = border[e[link3.ei2].border];
+                        if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;
+                        Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
+                        double& b = border[edges[link3.edge_index2].border];
                         b = min(b, link3.fz*z + link3.fc);
                     }
                 }
@@ -94,22 +94,22 @@ int main() {
             }
 
             maxskip = 0;
-            follow(link.ei2, 1, 0, link.ei2);
+            follow(link.edge_index2, 1, 0, link.edge_index2);
             if (add) {
                 for (int h = 0; h < maxskip; h++) {
-                    while (link.ei1 != -1 && e[link.ei1].skip[1].size() <= h) link = e[link.ei1].skip[0][h-1].rev() + link;
-                    while (link.ei2 != -1 && e[link.ei2].skip[1].size() <= h) link = link + e[link.ei2].skip[1][h-1];
-                    if (link.ei1 == -1 || link.ei2 == -1) break;
-                    e[link.ei1].skip[1][h] = link;
-                    e[link.ei2].skip[0][h] = link.rev();
+                    while (link.edge_index1 != -1 && edges[link.edge_index1].skip[1].size() <= h) link = edges[link.edge_index1].skip[0][h - 1].rev() + link;
+                    while (link.edge_index2 != -1 && edges[link.edge_index2].skip[1].size() <= h) link = link + edges[link.edge_index2].skip[1][h - 1];
+                    if (link.edge_index1 == -1 || link.edge_index2 == -1) break;
+                    edges[link.edge_index1].skip[1][h] = link;
+                    edges[link.edge_index2].skip[0][h] = link.rev();
                 }
             } else {
                 for (int dir = 0; dir < 2; dir++) {
-                    int ei = dir ? link.ei2 : link.ei1;
+                    int ei = dir ? link.edge_index2 : link.edge_index1;
                     for (int h = 0; h < maxskip; h++) {
-                        while (ei != -1 && e[ei].skip[dir].size() <= h) ei = e[ei].skip[dir][h-1].ei2;
+                        while (ei != -1 && edges[ei].skip[dir].size() <= h) ei = edges[ei].skip[dir][h - 1].edge_index2;
                         if (ei == -1) break;
-                        e[ei].skip[!dir][h] = Link{ei, -1, 0.0, 0.0};
+                        edges[ei].skip[!dir][h] = Link{ei, -1, 0.0, 0.0};
                     }
                 }
             }
