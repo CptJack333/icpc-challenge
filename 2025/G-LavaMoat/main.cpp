@@ -13,7 +13,7 @@ struct Link {
 };
 
 struct Edge {
-    int a, b, border;
+    int a, b, border;//1 ab都在西边界 2 ab都在东边界 0 无
     vector<vector<Link>> skip{{}, {}};
 };
 
@@ -46,9 +46,9 @@ int main() {
             for (int j = 0; j < 2; j++) {
                 int lo = j?B:A, hi = j?C:B, zero=j?C:A;
                 double fz = ml / (vz[B]-vz[zero]), fc = -fz * vz[zero];
-                Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc};
+                Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc};//ei1 ei2的顺序是怎么来的
                 if (flip) swap(link.edge_index1, link.edge_index2);
-                events.push_back({vz[lo], true , lo, link});
+                events.push_back({vz[lo], true , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
                 events.push_back({vz[hi], false, hi, link});
             }
         }
@@ -56,18 +56,18 @@ int main() {
 
         double ret = 1e18;
         int maxskip = 0;
-        for (int ei = 0; ei < edges.size(); ei++) {
+        for (int ei = 0; ei < edges.size(); ei++) { //初始化跳链
             do {
-                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0});
+                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0});//todo 为什么是这样
                 edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0});
             } while (rand()%2);
         }
-        function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {
+        function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {//todo 如果不实用跳链，用直查遍历链，算法是怎么样的
             auto const& s = edges[ei].skip[dir];
             maxskip = max<int>(maxskip, s.size());
-            if (s[h].edge_index2 == rep) return Link{ei, ei, 1e50, 1e50};  // cycle
-            while (h+1 < s.size() && s[h+1].edge_index2 != -1) { h++; rep = ei; }
-            while (h > 0 && s[h].edge_index2 == -1) h--;
+            if (s[h].edge_index2 == rep) return Link{ei, ei, 1e50, 1e50};  // cycle todo
+            while (h+1 < s.size() && s[h+1].edge_index2 != -1) { h++; rep = ei; } //todo
+            while (h > 0 && s[h].edge_index2 == -1) h--;//todo
             if (s[h].edge_index2 == -1) return Link{ei, ei, 0.0, 0.0};
             return s[h] + follow(s[h].edge_index2, dir, h, rep);
         };
@@ -75,27 +75,28 @@ int main() {
         for (int i = 0; i < events.size(); i++) {
             auto [z, add, zv, link] = events[i];
 
-            if (i > 0 && z != get<0>(events[i-1])) {
-                vector<double> border(3, 1e50);
-                if (vx[zv] == 0) border[1] = 0.0;
-                if (vx[zv] == X) border[2] = 0.0;
+            if (i > 0 && z != get<0>(events[i-1])) {//高度发生了变化
+                vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
+                if (vx[zv] == 0) border[1] = 0.0;//点在西边界
+                if (vx[zv] == X) border[2] = 0.0;//点在东边界
                 for (int j = i; j < events.size(); j++) {
-                    auto [z2, add2, zv2, link2] = events[j];
-                    if (z2 != z || add2) break;
-                    for (int dir = 0; dir < 2; dir++) {
+                    auto [z2, _, _, link2] = events[j];
+                    if (z2 != z ) break;//拿到所有同一个新高度的点
+//                    if (z2 != z || add2) break;//拿到所有同一个新高度的点
+                    for (int dir = 0; dir < 2; dir++) {//尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
-                        if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;
-                        Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
+                        if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//从zv出发的，如果link2回到zv，就是有环
+                        Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);//todo follow到底了什么
                         double& b = border[edges[link3.edge_index2].border];
-                        b = min(b, link3.fz*z + link3.fc);
+                        b = min(b, link3.fz*z + link3.fc);//这里其实是一个动态规划？
                     }
                 }
                 ret = min(ret, border[1]+border[2]);
             }
 
             maxskip = 0;
-            follow(link.edge_index2, 1, 0, link.edge_index2);
-            if (add) {
+            follow(link.edge_index2, 1, 0, link.edge_index2);//todo
+            if (add) {//todo 应该是在更新条链表
                 for (int h = 0; h < maxskip; h++) {
                     while (link.edge_index1 != -1 && edges[link.edge_index1].skip[1].size() <= h) link = edges[link.edge_index1].skip[0][h - 1].rev() + link;
                     while (link.edge_index2 != -1 && edges[link.edge_index2].skip[1].size() <= h) link = link + edges[link.edge_index2].skip[1][h - 1];
