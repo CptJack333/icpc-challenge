@@ -80,12 +80,12 @@ int main() {
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
                 for (int j = i; j < events.size(); j++) {
-                    auto [z2, _, _, link2] = events[j];
+                    auto [z2, add2, zv2, link2] = events[j];
                     if (z2 != z ) break;//拿到所有同一个新高度的点
-//                    if (z2 != z || add2) break;//拿到所有同一个新高度的点
+//                    if (z2 != z || add2) break;//去重加速
                     for (int dir = 0; dir < 2; dir++) {//尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
-                        if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//从zv出发的，如果link2回到zv，就是有环
+                        if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//去重加速
                         Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);//todo follow到底了什么
                         double& b = border[edges[link3.edge_index2].border];
                         b = min(b, link3.fz*z + link3.fc);//这里其实是一个动态规划？
