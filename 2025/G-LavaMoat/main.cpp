@@ -60,35 +60,35 @@ int main() {
             do {
                 edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0});//todo 为什么是这样
                 edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0});
-            } while (rand()%2);
+            } while (rand()%2);//每个edge随机跳链高度
         }
-        function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {//todo 如果不实用跳链，用直查遍历链，算法是怎么样的
+        function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {//如果不使用跳链，相当于每次h都是1，一直深度优先遍历到底
             auto const& s = edges[ei].skip[dir];
             maxskip = max<int>(maxskip, s.size());
-            if (s[h].edge_index2 == rep) return Link{ei, ei, 1e50, 1e50};  // cycle todo
-            while (h+1 < s.size() && s[h+1].edge_index2 != -1) { h++; rep = ei; } //todo
-            while (h > 0 && s[h].edge_index2 == -1) h--;//todo
+            if (s[h].edge_index2 == rep) return Link{ei, ei, 1e50, 1e50};  // cycle。 rep其实就是递归第一次进来的ei，后面递又找到了，说明是通过环找回来了
+            while (h+1 < s.size() && s[h+1].edge_index2 != -1) { h++; rep = ei; } //找当前能跳的最远的
+            while (h > 0 && s[h].edge_index2 == -1) h--;
             if (s[h].edge_index2 == -1) return Link{ei, ei, 0.0, 0.0};
-            return s[h] + follow(s[h].edge_index2, dir, h, rep);
+            return s[h] + follow(s[h].edge_index2, dir, h, rep);// 一跳接一跳
         };
 
         for (int i = 0; i < events.size(); i++) {
             auto [z, add, zv, link] = events[i];
 
-            if (i > 0 && z != get<0>(events[i-1])) {//高度发生了变化
+            if (i > 0 && z != get<0>(events[i-1])) {//高度发生了变化，这个条件也是加速
                 vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
                 for (int j = i; j < events.size(); j++) {
                     auto [z2, add2, zv2, link2] = events[j];
-                    if (z2 != z ) break;//拿到所有同一个新高度的点
-//                    if (z2 != z || add2) break;//去重加速
-                    for (int dir = 0; dir < 2; dir++) {//尝试从同一高度的link的两个方向出去
+                    if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2去重加速
+                    for (int dir = 0; dir < 2; dir++) {             //todo 尝试从同一高度的link的两个方向出去？ boarder 1是西边界，2是东边界，为什么跑出来个0？？
                         link2 = link2.rev();
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//去重加速
-                        Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);//todo follow到底了什么
+                        Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
                         double& b = border[edges[link3.edge_index2].border];
-                        b = min(b, link3.fz*z + link3.fc);//这里其实是一个动态规划？
+                        if(edges[link3.edge_index2].border!=0)//妈的！其实是不需要border 0的！
+                            b = min(b, link3.fz*z + link3.fc);
                     }
                 }
                 ret = min(ret, border[1]+border[2]);
