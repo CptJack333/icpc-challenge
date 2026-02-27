@@ -58,7 +58,7 @@ int main() {
         int maxskip = 0;
         for (int ei = 0; ei < edges.size(); ei++) { //初始化跳链
             do {
-                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0});//todo 为什么是这样
+                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0});
                 edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0});
             } while (rand()%2);//每个edge随机跳链高度
         }
@@ -82,7 +82,7 @@ int main() {
                 for (int j = i; j < events.size(); j++) {
                     auto [z2, add2, zv2, link2] = events[j];
                     if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2去重加速
-                    for (int dir = 0; dir < 2; dir++) {             //todo 尝试从同一高度的link的两个方向出去？ boarder 1是西边界，2是东边界，为什么跑出来个0？？
+                    for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//去重加速
                         Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
@@ -95,8 +95,8 @@ int main() {
             }
 
             maxskip = 0;
-            follow(link.edge_index2, 1, 0, link.edge_index2);//todo
-            if (add) {//todo 应该是在更新条链表
+            follow(link.edge_index2, 1, 0, link.edge_index2);
+            if (add) {// 更新跳链表
                 for (int h = 0; h < maxskip; h++) {
                     while (link.edge_index1 != -1 && edges[link.edge_index1].skip[1].size() <= h) link = edges[link.edge_index1].skip[0][h - 1].rev() + link;
                     while (link.edge_index2 != -1 && edges[link.edge_index2].skip[1].size() <= h) link = link + edges[link.edge_index2].skip[1][h - 1];
