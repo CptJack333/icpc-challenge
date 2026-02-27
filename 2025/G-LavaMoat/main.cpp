@@ -65,10 +65,16 @@ int main() {
         function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {//如果不使用跳链，相当于每次h都是1，一直深度优先遍历到底
             auto const& s = edges[ei].skip[dir];
             maxskip = max<int>(maxskip, s.size());
-            if (s[h].edge_index2 == rep) return Link{ei, ei, 1e50, 1e50};  // cycle。 rep其实就是递归第一次进来的ei，后面递又找到了，说明是通过环找回来了
-            while (h+1 < s.size() && s[h+1].edge_index2 != -1) { h++; rep = ei; } //找当前能跳的最远的
-            while (h > 0 && s[h].edge_index2 == -1) h--;
-            if (s[h].edge_index2 == -1) return Link{ei, ei, 0.0, 0.0};
+            if (s[h].edge_index2 == rep)
+                return Link{ei, ei, 1e50, 1e50};  // cycle。 rep其实就是递归第一次进来的ei，后面递又找到了，说明是通过环找回来了
+            while (h+1 < s.size() && s[h+1].edge_index2 != -1) {
+                h++;
+                rep = ei;
+            } //找当前能跳的最远的
+            while (h > 0 && s[h].edge_index2 == -1)
+                h--;
+            if (s[h].edge_index2 == -1)
+                return Link{ei, ei, 0.0, 0.0};
             return s[h] + follow(s[h].edge_index2, dir, h, rep);// 一跳接一跳
         };
 
@@ -95,11 +101,13 @@ int main() {
             }
 
             maxskip = 0;
-            follow(link.edge_index2, 1, 0, link.edge_index2);
+            follow(link.edge_index2, 1, 0, link.edge_index2);//得到当前的maxskip
             if (add) {// 更新跳链表
                 for (int h = 0; h < maxskip; h++) {
-                    while (link.edge_index1 != -1 && edges[link.edge_index1].skip[1].size() <= h) link = edges[link.edge_index1].skip[0][h - 1].rev() + link;
-                    while (link.edge_index2 != -1 && edges[link.edge_index2].skip[1].size() <= h) link = link + edges[link.edge_index2].skip[1][h - 1];
+                    while (link.edge_index1 != -1 && edges[link.edge_index1].skip[1].size() <= h)
+                        link = edges[link.edge_index1].skip[0][h - 1].rev() + link;
+                    while (link.edge_index2 != -1 && edges[link.edge_index2].skip[1].size() <= h)
+                        link = link + edges[link.edge_index2].skip[1][h - 1];
                     if (link.edge_index1 == -1 || link.edge_index2 == -1) break;
                     edges[link.edge_index1].skip[1][h] = link;
                     edges[link.edge_index2].skip[0][h] = link.rev();
@@ -108,7 +116,8 @@ int main() {
                 for (int dir = 0; dir < 2; dir++) {
                     int ei = dir ? link.edge_index2 : link.edge_index1;
                     for (int h = 0; h < maxskip; h++) {
-                        while (ei != -1 && edges[ei].skip[dir].size() <= h) ei = edges[ei].skip[dir][h - 1].edge_index2;
+                        while (ei != -1 && edges[ei].skip[dir].size() <= h)
+                            ei = edges[ei].skip[dir][h - 1].edge_index2;
                         if (ei == -1) break;
                         edges[ei].skip[!dir][h] = Link{ei, -1, 0.0, 0.0};
                     }
