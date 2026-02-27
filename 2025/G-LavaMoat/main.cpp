@@ -78,10 +78,11 @@ int main() {
             return s[h] + follow(s[h].edge_index2, dir, h, rep);// 一跳接一跳
         };
 
+        long long oldz=-1;
         for (int i = 0; i < events.size(); i++) {
             auto [z, add, zv, link] = events[i];
 
-            if (i > 0 && z != get<0>(events[i-1])) {//高度发生了变化，这个条件也是加速
+            if (oldz==-1 || z!=oldz) {//高度发生了变化，这个条件也是加速
                 vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
@@ -98,6 +99,7 @@ int main() {
                     }
                 }
                 ret = min(ret, border[1]+border[2]);
+                oldz=z;
             }
 
             maxskip = 0;
