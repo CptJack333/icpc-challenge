@@ -50,7 +50,7 @@ int main() {
             for (int j = 0; j < 2; j++) {
                 int lo = j?B:A, hi = j?C:B, zero=j?C:A;
                 double fz = ml / (vz[B]-vz[zero]), fc = -fz * vz[zero];
-                Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc};//ei1 ei2的顺序是怎么来的
+                Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc,&edges[edge_idx(lo, hi)], &edges[edge_idx(A, C)]};//ei1 ei2的顺序是怎么来的
                 if (flip) swap(link.edge_index1, link.edge_index2);
                 events.push_back({vz[lo], true , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
                 events.push_back({vz[hi], false, hi, link});
