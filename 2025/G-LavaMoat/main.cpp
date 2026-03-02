@@ -67,6 +67,7 @@ int main() {
             } while (rand()%2);//每个edge随机跳链高度
 //            } while (false);//取消skip的功能，可以输出正确结果，但很慢
         }
+        //在edge ei上，根据dir，向对应方向一直走到尽头(即Link的edge_index2 == -1)。follow返回的link edge_index1都是ei
         function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {//如果不使用跳链，相当于每次h都是1，一直深度优先遍历到底
             auto const& s = edges[ei].skip[dir];
             maxskip = max<int>(maxskip, s.size());
@@ -80,7 +81,9 @@ int main() {
                 h--;
             if (s[h].edge_index2 == -1)
                 return Link{ei, ei, 0.0, 0.0,&edges[ei],&edges[ei]};
-            return s[h] + follow(s[h].edge_index2, dir, h, rep);// 一跳接一跳
+            auto ret =s[h] + follow(s[h].edge_index2, dir, h, rep);
+//            assert(ret.edge_index1 == ei);
+            return ret;
         };
 
         long long oldz=-1;
