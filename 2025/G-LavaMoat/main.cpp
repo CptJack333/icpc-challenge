@@ -33,7 +33,7 @@ int main() {
         auto edge_idx = [&](int a, int b) {
             if (edge_index.count({a, b})) return edge_index[{a, b}];
             int ret = edge_index[{a, b}] = edges.size();
-            edges.push_back(Edge{za:vz[a],zb:vz[b],a: a, b: b, border: vx[a] == 0 && vx[b] == 0 ? 1 : vx[a] == X && vx[b] == X ? 2 : 0});
+            edges.push_back(Edge{a: a, b: b, border: vx[a] == 0 && vx[b] == 0 ? 1 : vx[a] == X && vx[b] == X ? 2 : 0,za:vz[a],zb:vz[b]});
             return ret;
         };
 
