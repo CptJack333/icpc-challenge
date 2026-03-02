@@ -1,19 +1,23 @@
 #include "bits/stdc++.h"
 using namespace std;
 
+struct Edge;
+
 struct Link {
     int edge_index1, edge_index2;
     double fz, fc;
+    Edge* edge1, *edge2;
     bool operator<(const Link& l) const { return false; }
     Link operator+(const Link& l) const {
         assert(edge_index2 == l.edge_index1);
-        return Link{edge_index1, l.edge_index2, fz + l.fz, fc + l.fc};
+        return Link{edge_index1, l.edge_index2, fz + l.fz, fc + l.fc,.edge1 = this->edge1,.edge2 = l.edge2};
     }
-    Link rev() const { return Link{edge_index2, edge_index1, fz, fc}; }
+    Link rev() const { return Link{edge_index2, edge_index1, fz, fc,.edge1 = edge2,.edge2 = edge1}; }
 };
 
 struct Edge {
     int a, b, border;//1 ab都在西边界 2 ab都在东边界 0 无
+    int64_t za,zb;
     vector<vector<Link>> skip{{}, {}};
 };
 
@@ -29,7 +33,7 @@ int main() {
         auto edge_idx = [&](int a, int b) {
             if (edge_index.count({a, b})) return edge_index[{a, b}];
             int ret = edge_index[{a, b}] = edges.size();
-            edges.push_back(Edge{a: a, b: b, border: vx[a] == 0 && vx[b] == 0 ? 1 : vx[a] == X && vx[b] == X ? 2 : 0});
+            edges.push_back(Edge{za:vz[a],zb:vz[b],a: a, b: b, border: vx[a] == 0 && vx[b] == 0 ? 1 : vx[a] == X && vx[b] == X ? 2 : 0});
             return ret;
         };
 
@@ -58,15 +62,15 @@ int main() {
         int maxskip = 0;
         for (int ei = 0; ei < edges.size(); ei++) { //初始化跳链
             do {
-                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0});
-                edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0});
+                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0,.edge1=&edges[ei]});
+                edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0,.edge1=&edges[ei]});
             } while (rand()%2);//每个edge随机跳链高度
         }
         function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {//如果不使用跳链，相当于每次h都是1，一直深度优先遍历到底
             auto const& s = edges[ei].skip[dir];
             maxskip = max<int>(maxskip, s.size());
             if (s[h].edge_index2 == rep)
-                return Link{ei, ei, 1e50, 1e50};  // cycle。 rep其实就是递归第一次进来的ei，后面递又找到了，说明是通过环找回来了
+                return Link{ei, ei, 1e50, 1e50,&edges[ei],&edges[ei]};  // cycle。 rep其实就是递归第一次进来的ei，后面递又找到了，说明是通过环找回来了
             while (h+1 < s.size() && s[h+1].edge_index2 != -1) {
                 h++;
                 rep = ei;
@@ -74,7 +78,7 @@ int main() {
             while (h > 0 && s[h].edge_index2 == -1)
                 h--;
             if (s[h].edge_index2 == -1)
-                return Link{ei, ei, 0.0, 0.0};
+                return Link{ei, ei, 0.0, 0.0,&edges[ei],&edges[ei]};
             return s[h] + follow(s[h].edge_index2, dir, h, rep);// 一跳接一跳
         };
 
