@@ -65,6 +65,7 @@ int main() {
                 edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0,.edge1=&edges[ei]});
                 edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0,.edge1=&edges[ei]});
             } while (rand()%2);//每个edge随机跳链高度
+//            } while (false);//取消skip的功能，可以输出正确结果，但很慢
         }
         function<Link(int,int,int,int)> follow = [&](int ei, int dir, int h, int rep) {//如果不使用跳链，相当于每次h都是1，一直深度优先遍历到底
             auto const& s = edges[ei].skip[dir];
@@ -110,7 +111,7 @@ int main() {
             follow(link.edge_index2, 1, 0, link.edge_index2);//得到当前的maxskip
             if (add) {// 更新跳链表
                 for (int h = 0; h < maxskip; h++) {
-                    while (link.edge_index1 != -1 && edges[link.edge_index1].skip[1].size() <= h)
+                    while (link.edge_index1 != -1 && edges[link.edge_index1].skip[0].size() <= h)
                         link = edges[link.edge_index1].skip[0][h - 1].rev() + link;
                     while (link.edge_index2 != -1 && edges[link.edge_index2].skip[1].size() <= h)
                         link = link + edges[link.edge_index2].skip[1][h - 1];
