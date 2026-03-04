@@ -14,10 +14,12 @@ frame.place(relx=0.5, rely=0.5, anchor="center")  # 中心对齐
 
 ############################global configs###########################################
 
-ballon_row_num=8
-ballon_col_num=8
-colors=["blue","red","green","yellow","orange","purple"]
+ballon_row_num=15
+ballon_col_num=10
+colors=["blue","red","green","yellow","orange"]#,"purple"]
 radius=30
+min_route_len=3
+
 
 ############################global configs###########################################
 
@@ -76,7 +78,7 @@ def on_mouse_release(event):
     mouse_pressed=False
     print("鼠标松开 route",route)
 
-    if len(route)>=2:
+    if len(route)>=min_route_len:
         for c in route:
             x,y=c
             circles[x-1][y-1][2]="unknown"
