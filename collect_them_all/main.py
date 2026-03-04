@@ -1,4 +1,5 @@
 import tkinter as tk
+from random import randint
 from tkinter import messagebox
 
 # 1. 创建主窗口
@@ -22,6 +23,9 @@ canvas.pack(fill=tk.BOTH, expand=True)
 
 # 存储圆形ID和对应的编号
 circle_ids = []
+
+colors=["blue","red","green","yellow"]#,"orange","purple"]
+
 
 # 点击事件处理函数
 def on_circle_click(event):
@@ -49,7 +53,8 @@ for i in range(ballon_row_num):
         y = 50 + i * 80  # 行索引 * 间距
         # 绘制圆形并保存ID
         radius=30
-        circle_id = canvas.create_oval(x-radius, y-radius, x+radius, y+radius, fill="blue")
+        color=colors[ randint(0,len(colors)-1)]
+        circle_id = canvas.create_oval(x-radius, y-radius, x+radius, y+radius, fill=color)
         # 存储圆形ID和编号
         circle_ids.append((circle_id, circle_number))
         # 递增编号
