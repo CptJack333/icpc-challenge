@@ -42,16 +42,34 @@ def get_ballon(event):
 
 # 绑定点击事件
 # 绑定鼠标按下事件和松开事件
+
+mouse_pressed=False
+route=[]
+
 def on_mouse_press(event):
+    global mouse_pressed
+    mouse_pressed=True
     x,y=get_ballon(event)
-    print(x,y)
-    pass
+    route.append((x,y))
+    print("鼠标按下",x,y)
 
 def on_mouse_release(event):
-    pass
+    global mouse_pressed
+    mouse_pressed=False
+    print("鼠标松开 route",route)
+    route.clear()
 
 canvas.bind("<ButtonPress-1>", on_mouse_press)
 canvas.bind("<ButtonRelease-1>", on_mouse_release)
+#绑定鼠标移动事件
+def on_mouse_move(event):
+    if mouse_pressed:
+        x,y=get_ballon(event)
+        if(route[-1]!=(x,y)):
+            route.append((x,y))
+            print(x,y)
+
+canvas.bind("<Motion>", on_mouse_move)
 
 # 在框体内画6x6个蓝色圆形
 circle_number = 0
