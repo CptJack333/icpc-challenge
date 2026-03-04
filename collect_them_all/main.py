@@ -28,7 +28,7 @@ colors=["blue","red","green","yellow"]#,"orange","purple"]
 
 
 # 点击事件处理函数
-def on_circle_click(event):
+def get_ballon(event):
     # 获取点击位置的所有对象
     items = canvas.find_closest(event.x, event.y)
     if items:
@@ -37,15 +37,24 @@ def on_circle_click(event):
         for i, (circle_id, number) in enumerate(circle_ids):
             if circle_id == item_id:
                 #展示第x,y个圆形，而不是number
-                x,y= int(number/ballon_col_num)+1, number%ballon_col_num
-                messagebox.showinfo("圆形点击", f"你点击了第 {x,y} 个圆形")
-                break
+                x,y= int(number/ballon_col_num)+1, number%ballon_col_num+1
+                return x,y
 
 # 绑定点击事件
-canvas.bind("<Button-1>", on_circle_click)
+# 绑定鼠标按下事件和松开事件
+def on_mouse_press(event):
+    x,y=get_ballon(event)
+    print(x,y)
+    pass
+
+def on_mouse_release(event):
+    pass
+
+canvas.bind("<ButtonPress-1>", on_mouse_press)
+canvas.bind("<ButtonRelease-1>", on_mouse_release)
 
 # 在框体内画6x6个蓝色圆形
-circle_number = 1
+circle_number = 0
 for i in range(ballon_row_num):
     for j in range(ballon_col_num):
         # 计算每个圆的中心坐标
