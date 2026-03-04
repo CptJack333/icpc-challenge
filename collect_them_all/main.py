@@ -94,16 +94,30 @@ def on_mouse_release(event):
                 canvas.itemconfig(circles[row][col][0], fill=circles[row][col][2])
 
     route.clear()
+    for line_id in route_line:
+        canvas.delete(line_id)
+    route_line.clear()
 
 
 canvas.bind("<ButtonPress-1>", on_mouse_press)
 canvas.bind("<ButtonRelease-1>", on_mouse_release)
+
+route_line=[]
+
 #绑定鼠标移动事件
 def on_mouse_move(event):
     if mouse_pressed:
-        x,y=get_ballon(event)
+        ret=get_ballon(event)
+        if ret==None:
+            return
+        x,y=ret
         if(route[-1]!=(x,y)):
             prev=route[-1]
+            if len(route)>=2:
+                pp=route[-2]
+                if((x,y)==pp):
+                    # print("不能返回上一个点")
+                    return
             px,py=prev
             if(abs(x-prev[0])>1 or abs(y-prev[1])>1):
                 # print("错误,请点击相邻的圆形")
@@ -112,6 +126,13 @@ def on_mouse_move(event):
                 # print("错误,请点击相同颜色的圆形")
                 return
             route.append((x,y))
+            # 用线段把circle连接起来
+            line_start_y=(radius*4/3) + (px-1) * 2*(radius*4/3)
+            line_start_x=(radius*4/3) + (py-1) * 2*(radius*4/3)
+            line_end_y=(radius*4/3) + (x-1) * 2*(radius*4/3)
+            line_end_x=(radius*4/3) + (y-1) * 2*(radius*4/3)
+            line_id=canvas.create_line(line_start_x, line_start_y, line_end_x, line_end_y, fill="black", width=2)
+            route_line.append(line_id)
             print(x,y)
 
 canvas.bind("<Motion>", on_mouse_move)
@@ -131,6 +152,7 @@ for i in range(ballon_row_num):
         circles[i].append([circle_id, circle_number,color])
         # 递增编号
         circle_number += 1
-
+    #     if(j>0):break
+    # if(i>0):break
 # 3. 运行主循环（界面常驻）
 root.mainloop()
