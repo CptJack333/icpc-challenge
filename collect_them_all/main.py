@@ -32,7 +32,9 @@ def on_circle_click(event):
         # 查找该圆形的编号
         for i, (circle_id, number) in enumerate(circle_ids):
             if circle_id == item_id:
-                messagebox.showinfo("圆形点击", f"你点击了第 {number} 个圆形")
+                #展示第x,y个圆形，而不是number
+                x,y= int(number/ballon_col_num)+1, number%ballon_col_num
+                messagebox.showinfo("圆形点击", f"你点击了第 {x,y} 个圆形")
                 break
 
 # 绑定点击事件
