@@ -5,27 +5,36 @@ from tkinter import messagebox
 # 1. 创建主窗口
 root = tk.Tk()
 root.title("Tkinter 极简界面")  # 窗口标题
-root.geometry("600x600")  # 窗口大小（宽x高）
 
 # 中心添加一个框体
 frame = tk.Frame(root, width=500, height=500, bg="lightgray")
 frame.place(relx=0.5, rely=0.5, anchor="center")  # 中心对齐
 
+
+
+############################global configs###########################################
+
+ballon_row_num=8
+ballon_col_num=8
+colors=["blue","red","green","yellow","orange","purple"]
+radius=30
+
+############################global configs###########################################
+
+# 创建一个大的Canvas覆盖整个frame
+frame_width=2*(radius*4/3)*(ballon_col_num)
+frame_height=2*(radius*4/3)*ballon_row_num
+canvas = tk.Canvas(frame, width=frame_width, height=frame_height, bg="lightgray", highlightthickness=0)
+canvas.pack(fill=tk.BOTH, expand=True)
+
+root_window_width=int(frame_width+100)
+root_window_height=int(frame_height+100)
+root.geometry(f"{root_window_width}x{root_window_height}")  # 窗口大小（宽x高）
 # 禁止调整窗口大小
 root.resizable(False, False)
 
-ballon_row_num=6
-ballon_col_num=6
-
-# 创建一个大的Canvas覆盖整个frame
-canvas = tk.Canvas(frame, width=500, height=500, bg="lightgray", highlightthickness=0)
-canvas.pack(fill=tk.BOTH, expand=True)
-
 # 存储圆形ID和对应的编号
 circles = []
-
-colors=["blue","red","green","yellow"]#,"orange","purple"]
-
 
 # 点击事件处理函数
 def get_ballon(event):
@@ -113,10 +122,9 @@ for i in range(ballon_row_num):
     circles.append([])
     for j in range(ballon_col_num):
         # 计算每个圆的中心坐标
-        x = 50 + j * 80  # 列索引 * 间距
-        y = 50 + i * 80  # 行索引 * 间距
+        x = (radius*4/3) + j * 2*(radius*4/3)  # 列索引 * 间距
+        y = (radius*4/3) + i * 2*(radius*4/3)  # 行索引 * 间距
         # 绘制圆形并保存ID
-        radius=30
         color=colors[ randint(0,len(colors)-1)]
         circle_id = canvas.create_oval(x-radius, y-radius, x+radius, y+radius, fill=color)
         # 存储圆形ID和编号
