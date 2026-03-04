@@ -48,7 +48,15 @@ def get_ballon(event):
                 if circle_id == item_id:
                     #展示第x,y个圆形，而不是number
                     x,y= int(number/ballon_col_num)+1, number%ballon_col_num+1
-                    return x,y
+
+                    center_x=radius*4/3 + (y-1) * 2*(radius*4/3)
+                    center_y=radius*4/3 + (x-1) * 2*(radius*4/3)
+
+                    # 如果点击位置在圆形内部
+                    if (event.x-center_x)**2+(event.y-center_y)**2<=radius**2:
+                        return x,y
+                    else:
+                        return None
 
 # 绑定点击事件
 # 绑定鼠标按下事件和松开事件
