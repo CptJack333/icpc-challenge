@@ -34,11 +34,12 @@ def get_ballon(event):
     if items:
         item_id = items[0]
         # 查找该圆形的编号
-        for i, (circle_id, number, color) in enumerate(circles):
-            if circle_id == item_id:
-                #展示第x,y个圆形，而不是number
-                x,y= int(number/ballon_col_num)+1, number%ballon_col_num+1
-                return x,y
+        for arr in (circles):
+            for i, (circle_id, number, color) in enumerate(arr):
+                if circle_id == item_id:
+                    #展示第x,y个圆形，而不是number
+                    x,y= int(number/ballon_col_num)+1, number%ballon_col_num+1
+                    return x,y
 
 # 绑定点击事件
 # 绑定鼠标按下事件和松开事件
@@ -57,6 +58,11 @@ def on_mouse_release(event):
     global mouse_pressed
     mouse_pressed=False
     print("鼠标松开 route",route)
+
+    # for c in route:
+    #     x,y=c
+    #     canvas.delete(circles[(x-1)*ballon_col_num+(y-1)][0])
+
     route.clear()
 
 
@@ -72,7 +78,7 @@ def on_mouse_move(event):
             if(abs(x-prev[0])>1 or abs(y-prev[1])>1):
                 # print("错误,请点击相邻的圆形")
                 return
-            if(circles[(x-1)*ballon_col_num+(y-1)][2]!=circles[(px-1)*ballon_col_num+(py-1)][2]):
+            if(circles[x-1][y-1][2]!=circles[px-1][py-1][2]):
                 # print("错误,请点击相同颜色的圆形")
                 return
             route.append((x,y))
@@ -83,6 +89,7 @@ canvas.bind("<Motion>", on_mouse_move)
 # 在框体内画6x6个蓝色圆形
 circle_number = 0
 for i in range(ballon_row_num):
+    circles.append([])
     for j in range(ballon_col_num):
         # 计算每个圆的中心坐标
         x = 50 + j * 80  # 列索引 * 间距
@@ -92,7 +99,7 @@ for i in range(ballon_row_num):
         color=colors[ randint(0,len(colors)-1)]
         circle_id = canvas.create_oval(x-radius, y-radius, x+radius, y+radius, fill=color)
         # 存储圆形ID和编号
-        circles.append((circle_id, circle_number,color))
+        circles[i].append((circle_id, circle_number,color))
         # 递增编号
         circle_number += 1
 
