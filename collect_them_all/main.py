@@ -59,9 +59,30 @@ def on_mouse_release(event):
     mouse_pressed=False
     print("鼠标松开 route",route)
 
-    # for c in route:
-    #     x,y=c
-    #     canvas.delete(circles[(x-1)*ballon_col_num+(y-1)][0])
+    if len(route)>=2:
+        for c in route:
+            x,y=c
+            circles[x-1][y-1][2]="unknown"
+
+        for col in range(ballon_col_num):
+            i=ballon_row_num-1
+            j=ballon_row_num-1
+            while(j>=0):
+                if circles[j][col][2]!="unknown":
+                    circles[i][col][2]=circles[j][col][2]
+                    i-=1
+                j-=1
+            for k in range(i+1):
+                circles[k][col][2]="unknown"
+
+        for row in range(ballon_row_num):
+            for col in range(ballon_col_num):
+                if circles[row][col][2]=="unknown":
+                    circles[row][col][2]=colors[ randint(0,len(colors)-1)]
+
+        for row in range(ballon_row_num):
+            for col in range(ballon_col_num):
+                canvas.itemconfig(circles[row][col][0], fill=circles[row][col][2])
 
     route.clear()
 
@@ -99,7 +120,7 @@ for i in range(ballon_row_num):
         color=colors[ randint(0,len(colors)-1)]
         circle_id = canvas.create_oval(x-radius, y-radius, x+radius, y+radius, fill=color)
         # 存储圆形ID和编号
-        circles[i].append((circle_id, circle_number,color))
+        circles[i].append([circle_id, circle_number,color])
         # 递增编号
         circle_number += 1
 
