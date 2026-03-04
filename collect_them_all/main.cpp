@@ -12,6 +12,8 @@ void initBoard(){
     board.resize(wid,vector<int>(hei));
     for(int i=0;i<wid;++i){
         for(int j=0;j<hei;++j){
+//            rand使用当前时间作为种子，确保每次运行结果不同
+            srand(time(0)+i*wid+j);
             board[i][j]=colors[rand()%colors.size()];
         }
     }
