@@ -19,13 +19,15 @@ ballon_col_num=6
 # 在框体内画6x6个蓝色圆形
 for i in range(ballon_row_num):
     for j in range(ballon_col_num):
-        # 计算每个圆的中心坐标
-        x = 100 + j * 100  # 列索引 * 间距
-        y = 100 + i * 100  # 行索引 * 间距
-        # 绘制圆形
-        canvas = tk.Canvas(frame, width=50, height=50, bg="lightgray", highlightthickness=0)
-        canvas.create_oval(x-25, y-25, x+25, y+25, fill="blue")
-        canvas.place(x=x, y=y)
+        # 计算每个圆的位置
+        x_pos = 50 + j * 80  # Canvas在frame中的x位置
+        y_pos = 50 + i * 80  # Canvas在frame中的y位置
+        # 创建Canvas并放置
+        radius=30
+        canvas = tk.Canvas(frame, width=radius*2, height=radius*2, bg="lightgray", highlightthickness=0)
+        canvas.place(x=x_pos-radius, y=y_pos-radius)  # 调整位置使圆心对齐
+        # 在Canvas内绘制圆形（使用相对坐标）
+        canvas.create_oval(0, 0, radius*2, radius*2, fill="blue")
 
 # 3. 运行主循环（界面常驻）
 root.mainloop()
