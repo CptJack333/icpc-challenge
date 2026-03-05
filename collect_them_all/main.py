@@ -1,3 +1,5 @@
+import math
+import time
 import tkinter as tk
 from random import randint
 from tkinter import messagebox
@@ -73,6 +75,59 @@ def on_mouse_press(event):
     route.append((x,y))
     print("鼠标按下",x,y)
 
+def create_particle_explosion(x, y):
+    """创建粒子爆炸效果"""
+    # 计算圆形在画布上的实际位置
+    center_x=(radius*4/3) + (y-1) * 2*(radius*4/3)
+    center_y=(radius*4/3) + (x-1) * 2*(radius*4/3)
+
+    # 粒子数量
+    particle_count = 20
+
+    # 创建粒子
+    particles = []
+    for _ in range(particle_count):
+        # 随机角度和速度
+        angle = 360 / particle_count * _
+        speed = 2 + 3 * (1 - _/particle_count)  # 速度递减
+
+        # 粒子初始位置
+        particle_x = center_x
+        particle_y = center_y
+
+        # 创建粒子
+        particle_id = canvas.create_oval(
+            particle_x - 3,
+            particle_y - 3,
+            particle_x + 3,
+            particle_y + 3,
+            fill="red" if _ % 2 == 0 else "yellow"
+        )
+
+        particles.append((particle_id, angle, speed))
+
+    # 粒子动画
+    for step in range(20):
+        for i, (particle_id, angle, speed) in enumerate(particles):
+            # 计算位移 - 使用三角函数确保实数结果
+            radian = math.radians(angle)
+            distance = speed * step * 0.5
+            dx = distance * math.cos(radian)
+            dy = distance * math.sin(radian)
+
+            # 更新粒子位置
+            canvas.move(particle_id, dx, dy)
+
+        # 更新画布
+        canvas.update()
+
+        # 短暂延迟
+        time.sleep(0.03)
+
+    # 清除所有粒子
+    for particle_id, _, _ in particles:
+        canvas.delete(particle_id)
+
 def on_mouse_release(event):
     global mouse_pressed
     mouse_pressed=False
@@ -98,6 +153,11 @@ def on_mouse_release(event):
             for col in range(ballon_col_num):
                 if circles[row][col][2]=="unknown":
                     circles[row][col][2]=colors[ randint(0,len(colors)-1)]
+
+        #给清除的圆添加爆炸效果
+
+        x,y=route[-1]
+        create_particle_explosion(x,y)
 
         for row in range(ballon_row_num):
             for col in range(ballon_col_num):
