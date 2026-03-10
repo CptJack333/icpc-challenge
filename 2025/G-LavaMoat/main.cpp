@@ -82,7 +82,7 @@ int main() {
             if (s[h].edge_index2 == -1)
                 return Link{ei, ei, 0.0, 0.0,&edges[ei],&edges[ei]};
             auto ret =s[h] + follow(s[h].edge_index2, dir, h, rep);
-//            assert(ret.edge_index1 == ei);
+//            assert(ret.edge_index1 == ei); // 这个是成立的
             return ret;
         };
 
@@ -112,6 +112,7 @@ int main() {
 
             maxskip = 0;
             follow(link.edge_index2, 1, 0, link.edge_index2);//得到当前的maxskip
+//            todo 为什么不是先更新跳链表 ？？？
             if (add) {// 更新跳链表
                 for (int h = 0; h < maxskip; h++) {
                     while (link.edge_index1 != -1 && edges[link.edge_index1].skip[0].size() <= h)
