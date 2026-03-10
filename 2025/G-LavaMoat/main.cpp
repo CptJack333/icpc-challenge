@@ -112,7 +112,7 @@ int main() {
 
             maxskip = 0;
             follow(link.edge_index2, 1, 0, link.edge_index2);//得到当前的maxskip
-//            todo 为什么不是先更新跳链表 ？？？
+//            更新跳链表放后面，是因为只取add等于false的话相当于判断的时候，条链表都更新了
             if (add) {// 更新跳链表
                 for (int h = 0; h < maxskip; h++) {
                     while (link.edge_index1 != -1 && edges[link.edge_index1].skip[0].size() <= h)
