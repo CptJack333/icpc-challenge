@@ -37,7 +37,7 @@ int main() {
             return ret;
         };
 
-        vector<tuple<int64_t,int,int,Link>> events; //触发高度、 操作类型、 关联顶点、 等高线片段
+        vector<tuple<int64_t,bool,int,Link>> events; //触发高度、 操作类型、 关联顶点、 等高线片段
         for (int i = 0; i < M; i++) {
             cin >> A >> B >> C; A--; B--; C--;//每个三角形的顶点,下标从0开始
             while (vz[A] > vz[B] || vz[A] > vz[C]) { swap(A, B); swap(B, C); }//确保A的高度最低
@@ -52,8 +52,8 @@ int main() {
                 double fz = ml / (vz[B]-vz[zero]), fc = -fz * vz[zero];
                 Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc,&edges[edge_idx(lo, hi)], &edges[edge_idx(A, C)]};//ei1 ei2的顺序是怎么来的
                 if (flip) swap(link.edge_index1, link.edge_index2);
-                events.push_back({vz[lo], 1 , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
-                events.push_back({vz[hi], 0, hi, link});
+                events.push_back({vz[lo], true , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
+                events.push_back({vz[hi], false, hi, link});
             }
         }
         sort(events.begin(), events.end());
@@ -87,49 +87,13 @@ int main() {
         };
 
         long long oldz=-1;
-        vector<tuple<int64_t,int,int,Link>> new_events;
         for (int i = 0; i < events.size(); i++) {
             auto [z, add, zv, link] = events[i];
 
-            if (oldz==-1 || z!=oldz) {
-                for (int j = i; j < events.size(); j++) {
-                    auto [z2, add2, zv2, link2] = events[j];
-                    if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2去重加速 . 同一个link对应add等于true和false，会被遍历两次 。所以只取add等于false那一次就避免重复遍历。只取add等于false的话相当于判断的时候，条链表都更新了
-                    new_events.push_back({z2, 2, zv2, link2});
-                }
-                oldz=z;
-            }
-            new_events.push_back(events[i]);
-        }
-
-
-
-        for (int i = 0; i < events.size(); i++) {
-            auto [z, add, zv, link] = events[i];
-
-            if (add==2) {//高度发生了变化，这个条件也是加速
+            if (oldz==-1 || z!=oldz) {//高度发生了变化，这个条件也是加速
                 vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
-
-
-
-
-                auto [z2, add2, zv2, link2] = events[i];
-                if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2去重加速 . 同一个link对应add等于true和false，会被遍历两次 。所以只取add等于false那一次就避免重复遍历。只取add等于false的话相当于判断的时候，条链表都更新了
-                for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
-                    link2 = link2.rev();
-                    if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//去重加速
-                    Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
-                    double& b = border[edges[link3.edge_index2].border];
-                    if(edges[link3.edge_index2].border!=0)//妈的！其实是不需要border 0的！
-                        b = min(b, link3.fz*z + link3.fc);
-                }
-
-
-
-
-
                 for (int j = i; j < events.size(); j++) {
                     auto [z2, add2, zv2, link2] = events[j];
                     if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2去重加速 . 同一个link对应add等于true和false，会被遍历两次 。所以只取add等于false那一次就避免重复遍历。只取add等于false的话相当于判断的时候，条链表都更新了
@@ -149,7 +113,7 @@ int main() {
             maxskip = 0;
             follow(link.edge_index2, 1, 0, link.edge_index2);//得到当前的maxskip
 //            更新跳链表放后面，是因为只取add等于false的话相当于判断的时候，条链表都更新了
-            if (add==1) {// 更新跳链表
+            if (add) {// 更新跳链表
                 for (int h = 0; h < maxskip; h++) {
                     while (link.edge_index1 != -1 && edges[link.edge_index1].skip[0].size() <= h)
                         link = edges[link.edge_index1].skip[0][h - 1].rev() + link;
@@ -161,7 +125,7 @@ int main() {
                 }
             }
 
-            if(add==0) {
+            if(!add) {
                 for (int dir = 0; dir < 2; dir++) {
                     int ei = dir ? link.edge_index2 : link.edge_index1;
                     for (int h = 0; h < maxskip; h++) {
