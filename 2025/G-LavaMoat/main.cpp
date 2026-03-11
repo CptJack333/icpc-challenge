@@ -38,7 +38,7 @@ int main() {
         };
 
         vector<tuple<int64_t,int,int,Link>> events; //触发高度、 操作类型、 关联顶点、 等高线片段
-        map<long long,vector<Link>> z2outlink;
+        vector<pair<long long,Link>> z2outlink;
         for (int i = 0; i < M; i++) {
             cin >> A >> B >> C; A--; B--; C--;//每个三角形的顶点,下标从0开始
             while (vz[A] > vz[B] || vz[A] > vz[C]) { swap(A, B); swap(B, C); }//确保A的高度最低
@@ -55,7 +55,7 @@ int main() {
                 if (flip) swap(link.edge_index1, link.edge_index2);
                 events.push_back({vz[lo], 2 , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
                 events.push_back({vz[hi], 1, hi, link});
-                z2outlink[vz[hi]].push_back(link);
+                z2outlink.push_back(make_pair(vz[hi],link));
                 events.push_back({vz[hi], 0, hi, {}});
             }
         }
@@ -67,6 +67,7 @@ int main() {
         }
 
         sort(events.begin(), events.end());
+        sort(z2outlink.begin(),z2outlink.end());
 
         double ret = 1e18;
         int maxskip = 0;
@@ -103,7 +104,19 @@ int main() {
                 vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
-                for(auto link2:z2outlink[z]){
+
+                auto [it_start, it_end] = std::equal_range(
+                        z2outlink.begin(),
+                        z2outlink.end(),
+                        std::make_pair(z, Link{}),  // 构造临时 pair，second 不影响
+                        [](const std::pair<long long, Link>& a, const std::pair<long long, Link>& b) {
+                            // 只按 first 比较（保证和 vector 的排序规则一致）
+                            return a.first < b.first;
+                        }
+                );
+
+                for(auto it = it_start; it != it_end; ++it){
+                    auto link2=it->second;
                     for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;// 这个方向绕回来zv2了

@@ -6,8 +6,9 @@ import os
 input_files = os.listdir('./data')
 input_files = [f for f in input_files if f.endswith('.in')]
 
-jump_case=["secret-76-skewed","secret-77-skewed","secret-99-bmerry","secret-z100-bmerry"]
-start_from=None
+# jump_case=["secret-76-skewed","secret-77-skewed","secret-99-bmerry","secret-z100-bmerry"]
+jump_case=[]
+start_from=77
 
 for ifi in input_files:
     #打开data/a.in
