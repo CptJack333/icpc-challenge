@@ -106,6 +106,7 @@ int main() {
                     if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2=true跳过是因为，只有false的，才有从zv2出去的等高线
                     for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
+                        assert(zv2==zv);// 必然的，围绕zv这个顶点，向各个方向出去，找能否到达边界
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;// 这个方向绕回来zv2了
                         Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
                         auto bd=edges[link3.edge_index2].border;
