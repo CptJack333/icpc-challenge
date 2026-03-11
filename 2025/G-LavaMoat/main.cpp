@@ -103,8 +103,7 @@ int main() {
                 vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
-                auto out_links=z2outlink[z];
-                for(auto link2:out_links){
+                for(auto link2:z2outlink[z]){
                     for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;// 这个方向绕回来zv2了
