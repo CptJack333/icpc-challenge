@@ -6,7 +6,7 @@ struct Edge;
 struct Link {
     int edge_index1, edge_index2;
     double fz, fc;
-    Edge* edge1, *edge2;
+    Edge* edge1, *edge2; // use for debug
     bool operator<(const Link& l) const { return false; }
     Link operator+(const Link& l) const {
         assert(edge_index2 == l.edge_index1);
@@ -15,9 +15,21 @@ struct Link {
     Link rev() const { return Link{edge_index2, edge_index1, fz, fc,.edge1 = edge2,.edge2 = edge1}; }
 };
 
+enum border_position{
+    not_on_border=0,
+    west_border=1,
+    east_border=2
+};
+
+enum event_type{
+    try_reach_border=0,
+    link_remove=1,
+    link_add=2,
+};
+
 struct Edge {
     int a, b, border;//1 ab都在西边界 2 ab都在东边界 0 无
-    int64_t za,zb;
+    int64_t za,zb; // use for debug
     vector<vector<Link>> skip{{}, {}};
 };
 
@@ -30,20 +42,26 @@ int main() {
 
         vector<Edge> edges;
         map<pair<int,int>, int> edge_index;
-        auto edge_idx = [&](int a, int b) {
+        auto get_edge_index = [&](int a, int b) {
             if (edge_index.count({a, b})) return edge_index[{a, b}];
             int ret = edge_index[{a, b}] = edges.size();
-            edges.push_back(Edge{a: a, b: b, border: vx[a] == 0 && vx[b] == 0 ? 1 : vx[a] == X && vx[b] == X ? 2 : 0,za:vz[a],zb:vz[b]});
+            edges.push_back(Edge{a: a, b: b, border: vx[a] == 0 && vx[b] == 0 ? west_border : vx[a] == X && vx[b] == X ? east_border : not_on_border,za:vz[a],zb:vz[b]});
             return ret;
         };
 
         vector<tuple<int64_t,int,int,Link>> events; //触发高度、 操作类型、 关联顶点、 等高线片段
-        vector<pair<long long,Link>> z2outlink;
+        vector<pair<long long,Link>> outlink_associated_with_vertex_at_height;
         for (int i = 0; i < M; i++) {
             cin >> A >> B >> C; A--; B--; C--;//每个三角形的顶点,下标从0开始
-            while (vz[A] > vz[B] || vz[A] > vz[C]) { swap(A, B); swap(B, C); }//确保A的高度最低
+            while (vz[A] > vz[B] || vz[A] > vz[C]) {  //确保A的高度最低
+                swap(A, B);
+                swap(B, C);
+            }
             bool flip = false;
-            if (vz[B] > vz[C]) { swap(B, C); flip = true; }//高度顺序ABC
+            if (vz[B] > vz[C]) {  //高度顺序ABC
+                swap(B, C);
+                flip = true;
+            }
             double mx = vx[A] + (vx[C]-vx[A])*(vz[B]-vz[A])/double(vz[C]-vz[A]);
             double my = vy[A] + (vy[C]-vy[A])*(vz[B]-vz[A])/double(vz[C]-vz[A]);
             double ml = hypot(mx-vx[B], my-vy[B]);//AC上一点连接B的等高线的长度
@@ -51,23 +69,29 @@ int main() {
             for (int j = 0; j < 2; j++) {
                 int lo = j?B:A, hi = j?C:B, zero=j?C:A;
                 double fz = ml / (vz[B]-vz[zero]), fc = -fz * vz[zero];
-                Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc, nullptr, nullptr};//ei1 ei2的顺序是怎么来的
-                if (flip) swap(link.edge_index1, link.edge_index2);
-                events.push_back({vz[lo], 2 , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
-                events.push_back({vz[hi], 1, hi, link});
-                z2outlink.push_back(make_pair(vz[hi],link));
-                events.push_back({vz[hi], 0, hi, {}});
+
+                Link link{get_edge_index(lo, hi), get_edge_index(A, C), fz, fc, nullptr, nullptr};
+
+                if (flip)
+                    swap(link.edge_index1, link.edge_index2);
+
+                events.push_back({vz[hi], try_reach_border, hi, {}});//到达一个顶点，检查能不能到达东西边界，还有距离
+                events.push_back({vz[hi], link_remove, hi, link});
+                events.push_back({vz[lo], link_add , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
+
+                outlink_associated_with_vertex_at_height.push_back(make_pair(vz[hi], link));//用于检查边界事件，与这个顶点关联的等高线
             }
         }
 
-        for(auto& ev:events){
+        for(auto& ev:events){//更新调试信息
             auto & l=get<3>(ev);
             l.edge1=&edges[l.edge_index1];
             l.edge2=&edges[l.edge_index2];
         }
 
+        //按照高度z和事件序号排序
         sort(events.begin(), events.end());
-        sort(z2outlink.begin(),z2outlink.end());
+        sort(outlink_associated_with_vertex_at_height.begin(), outlink_associated_with_vertex_at_height.end());
 
         double ret = 1e18;
         int maxskip = 0;
@@ -101,15 +125,15 @@ int main() {
         for (int i = 0; i < events.size(); i++) {
             auto [z, add, zv, link] = events[i];
 
-            if (add==0) {//高度发生了变化，这个条件也是加速
+            if (add==try_reach_border) {//高度发生了变化，这个条件也是加速
                 vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
 
-                while(z2outlinkindex<z2outlink.size()&&z2outlink[z2outlinkindex].first<z)++z2outlinkindex;
+                while(z2outlinkindex < outlink_associated_with_vertex_at_height.size() && outlink_associated_with_vertex_at_height[z2outlinkindex].first < z)++z2outlinkindex;
 
-                for(; z2outlinkindex<z2outlink.size()&& z2outlink[z2outlinkindex].first==z ; ++z2outlinkindex){
-                    auto link2=z2outlink[z2outlinkindex].second;
+                for(; z2outlinkindex < outlink_associated_with_vertex_at_height.size() && outlink_associated_with_vertex_at_height[z2outlinkindex].first == z ; ++z2outlinkindex){
+                    auto link2=outlink_associated_with_vertex_at_height[z2outlinkindex].second;
                     for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;// 这个方向绕回来zv2了
@@ -127,7 +151,7 @@ int main() {
             maxskip = 0;
             follow(link.edge_index2, 1, 0, link.edge_index2);//得到当前的maxskip
 //            更新跳链表放后面，是因为只取add等于false的话相当于判断的时候，条链表都更新了
-            if (add==2) {// 更新跳链表
+            if (add==link_add) {// 更新跳链表
                 for (int h = 0; h < maxskip; h++) {
                     while (link.edge_index1 != -1 && edges[link.edge_index1].skip[0].size() <= h)
                         link = edges[link.edge_index1].skip[0][h - 1].rev() + link;
@@ -139,7 +163,7 @@ int main() {
                 }
             }
 
-            if(add==1) {
+            if(add==link_remove) {
                 for (int dir = 0; dir < 2; dir++) {
                     int ei = dir ? link.edge_index2 : link.edge_index1;
                     for (int h = 0; h < maxskip; h++) {
