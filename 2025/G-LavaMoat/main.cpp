@@ -76,10 +76,10 @@ int main() {
                     swap(link.edge_index1, link.edge_index2);
 
                 events.push_back({vz[hi], try_reach_border, hi, {}});//到达一个顶点，检查能不能到达东西边界，还有距离
-                events.push_back({vz[hi], link_remove, hi, link});
-                events.push_back({vz[lo], link_add , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
+                events.emplace_back(vz[hi], link_remove, hi, link);
+                events.emplace_back(vz[lo], link_add , lo, link);//z从低到高，把每一个节点推入，还有对应的edge间的链接
 
-                outlink_associated_with_vertex_at_height.push_back(make_pair(vz[hi], link));//用于检查边界事件，与这个顶点关联的等高线
+                outlink_associated_with_vertex_at_height.emplace_back(vz[hi], link);//用于检查边界事件，与这个顶点关联的等高线
             }
         }
 
@@ -122,9 +122,7 @@ int main() {
         };
 
         int z2outlinkindex=0;//用下标直接访问代替二分查找，减少logn的复杂度
-        for (int i = 0; i < events.size(); i++) {// 处理事件主循环
-            auto [z, add, zv, link] = events[i];
-
+        for (auto [z, add, zv, link] : events) {// 处理事件主循环
             if (add==try_reach_border) {//高度发生了变化，这个条件也是加速
                 vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
