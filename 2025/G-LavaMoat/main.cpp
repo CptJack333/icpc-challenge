@@ -96,7 +96,7 @@ int main() {
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
                 for (int j = i; j < events.size(); j++) {
                     auto [z2, add2, zv2, link2] = events[j];
-                    if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2去重加速 . 同一个link对应add等于true和false，会被遍历两次 。所以只取add等于false那一次就避免重复遍历。只取add等于false的话相当于判断的时候，条链表都更新了
+                    if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2=true跳过是因为，只有false的，才有从zv2出去的等高线
                     for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//去重加速
