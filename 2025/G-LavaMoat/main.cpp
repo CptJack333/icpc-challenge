@@ -38,6 +38,7 @@ int main() {
         };
 
         vector<tuple<int64_t,int,int,Link>> events; //触发高度、 操作类型、 关联顶点、 等高线片段
+        map<long long,vector<Link>> z2outlink;
         for (int i = 0; i < M; i++) {
             cin >> A >> B >> C; A--; B--; C--;//每个三角形的顶点,下标从0开始
             while (vz[A] > vz[B] || vz[A] > vz[C]) { swap(A, B); swap(B, C); }//确保A的高度最低
@@ -54,6 +55,7 @@ int main() {
                 if (flip) swap(link.edge_index1, link.edge_index2);
                 events.push_back({vz[lo], 2 , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
                 events.push_back({vz[hi], 1, hi, link});
+                z2outlink[vz[hi]].push_back(link);
                 events.push_back({vz[hi], 0, hi, {}});
             }
         }
@@ -98,24 +100,13 @@ int main() {
             auto [z, add, zv, link] = events[i];
 
             if (add==0) {//高度发生了变化，这个条件也是加速
-
-                vector<tuple<int64_t,int,int,Link>> out_links;
-                for (int j = i; j < events.size(); j++) {
-                    auto [z2, add2, zv2, link2] = events[j];
-                    if(add2!=1)continue;
-                    if (z2 != z) break;
-                    out_links.push_back(events[j]);
-                }
-
                 vector<double> border(3, 1e50);//所有长度置0，从当前点一直找到东西边界，然后计算长度
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
-                for(auto ol:out_links){
-
-                    auto [z2, add2, zv2, link2] = ol;
+                auto out_links=z2outlink[z];
+                for(auto link2:out_links){
                     for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
-                        assert(zv2==zv);// 必然的，围绕zv这个顶点，向各个方向出去，找能否到达边界
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;// 这个方向绕回来zv2了
                         Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
                         auto bd=edges[link3.edge_index2].border;
