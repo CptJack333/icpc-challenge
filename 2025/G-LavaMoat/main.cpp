@@ -121,8 +121,8 @@ int main() {
             return ret;
         };
 
-        int z2outlinkindex=0;
-        for (int i = 0; i < events.size(); i++) {
+        int z2outlinkindex=0;//用下标直接访问代替二分查找，减少logn的复杂度
+        for (int i = 0; i < events.size(); i++) {// 处理事件主循环
             auto [z, add, zv, link] = events[i];
 
             if (add==try_reach_border) {//高度发生了变化，这个条件也是加速
@@ -161,9 +161,7 @@ int main() {
                     edges[link.edge_index1].skip[1][h] = link;
                     edges[link.edge_index2].skip[0][h] = link.rev();
                 }
-            }
-
-            if(add==link_remove) {
+            }else if(add==link_remove) {
                 for (int dir = 0; dir < 2; dir++) {
                     int ei = dir ? link.edge_index2 : link.edge_index1;
                     for (int h = 0; h < maxskip; h++) {
