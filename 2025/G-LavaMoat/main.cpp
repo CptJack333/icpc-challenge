@@ -101,9 +101,9 @@ int main() {
                         link2 = link2.rev();
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//去重加速
                         Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
-                        double& b = border[edges[link3.edge_index2].border];
-                        if(edges[link3.edge_index2].border!=0)//妈的！其实是不需要border 0的！
-                            b = min(b, link3.fz*z + link3.fc);
+                        auto bd=edges[link3.edge_index2].border;
+                        if(bd!=0)//妈的！其实是不需要border 0的！
+                            border[edges[link3.edge_index2].border] = min(border[edges[link3.edge_index2].border], link3.fz*z + link3.fc);
                     }
                 }
                 ret = min(ret, border[1]+border[2]);
