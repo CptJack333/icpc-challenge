@@ -8,7 +8,7 @@ input_files = [f for f in input_files if f.endswith('.in')]
 
 # jump_case=["secret-76-skewed","secret-77-skewed","secret-99-bmerry","secret-z100-bmerry"]
 jump_case=[]
-start_from=77
+start_from=None
 
 for ifi in input_files:
     #打开data/a.in

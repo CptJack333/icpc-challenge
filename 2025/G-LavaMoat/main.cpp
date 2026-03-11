@@ -97,6 +97,7 @@ int main() {
             return ret;
         };
 
+        int z2outlinkindex=0;
         for (int i = 0; i < events.size(); i++) {
             auto [z, add, zv, link] = events[i];
 
@@ -105,18 +106,10 @@ int main() {
                 if (vx[zv] == 0) border[1] = 0.0;//点在西边界
                 if (vx[zv] == X) border[2] = 0.0;//点在东边界
 
-                auto [it_start, it_end] = std::equal_range(
-                        z2outlink.begin(),
-                        z2outlink.end(),
-                        std::make_pair(z, Link{}),  // 构造临时 pair，second 不影响
-                        [](const std::pair<long long, Link>& a, const std::pair<long long, Link>& b) {
-                            // 只按 first 比较（保证和 vector 的排序规则一致）
-                            return a.first < b.first;
-                        }
-                );
+                while(z2outlinkindex<z2outlink.size()&&z2outlink[z2outlinkindex].first<z)++z2outlinkindex;
 
-                for(auto it = it_start; it != it_end; ++it){
-                    auto link2=it->second;
+                for(; z2outlinkindex<z2outlink.size()&& z2outlink[z2outlinkindex].first==z ; ++z2outlinkindex){
+                    auto link2=z2outlink[z2outlinkindex].second;
                     for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
                         if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;// 这个方向绕回来zv2了
