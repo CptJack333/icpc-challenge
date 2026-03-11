@@ -50,20 +50,27 @@ int main() {
             for (int j = 0; j < 2; j++) {
                 int lo = j?B:A, hi = j?C:B, zero=j?C:A;
                 double fz = ml / (vz[B]-vz[zero]), fc = -fz * vz[zero];
-                Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc,&edges[edge_idx(lo, hi)], &edges[edge_idx(A, C)]};//ei1 ei2的顺序是怎么来的
+                Link link{edge_idx(lo, hi), edge_idx(A, C), fz, fc, nullptr, nullptr};//ei1 ei2的顺序是怎么来的
                 if (flip) swap(link.edge_index1, link.edge_index2);
                 events.push_back({vz[lo], true , lo, link});//z从低到高，把每一个节点推入，还有对应的edge间的链接
                 events.push_back({vz[hi], false, hi, link});
             }
         }
+
+        for(auto& ev:events){
+            auto & l=get<3>(ev);
+            l.edge1=&edges[l.edge_index1];
+            l.edge2=&edges[l.edge_index2];
+        }
+
         sort(events.begin(), events.end());
 
         double ret = 1e18;
         int maxskip = 0;
         for (int ei = 0; ei < edges.size(); ei++) { //初始化跳链
             do {
-                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0,.edge1=&edges[ei]});
-                edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0,.edge1=&edges[ei]});
+                edges[ei].skip[0].push_back(Link{ei, -1, 0.0, 0.0,.edge1=&edges[ei],.edge2=nullptr});
+                edges[ei].skip[1].push_back(Link{ei, -1, 0.0, 0.0,.edge1=&edges[ei],.edge2=nullptr});
             } while (rand()%2);//每个edge随机跳链高度
 //            } while (false);//取消skip的功能，可以输出正确结果，但很慢
         }
@@ -99,7 +106,7 @@ int main() {
                     if (z2 != z || add2) break;             //拿到所有同一个新高度的点。add2=true跳过是因为，只有false的，才有从zv2出去的等高线
                     for (int dir = 0; dir < 2; dir++) {             // 尝试从同一高度的link的两个方向出去
                         link2 = link2.rev();
-                        if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;//去重加速
+                        if (edges[link2.edge_index2].a == zv || edges[link2.edge_index2].b == zv) continue;// 这个方向绕回来zv2了
                         Link link3 = follow(link2.edge_index1, dir, 0, link2.edge_index1);
                         auto bd=edges[link3.edge_index2].border;
                         if(bd!=0)//妈的！其实是不需要border 0的！
