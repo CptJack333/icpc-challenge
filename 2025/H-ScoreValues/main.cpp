@@ -75,6 +75,10 @@ int dfs(int index, int remainder, bool limit, int desired_digit){//return best_c
 }
 
 vector<long long> get_reachable_score_under_frobenius_number(vector<int> coins){
+     if(coins.size()==1){
+        return {0,std::min((int)m,coins.front())};
+    }
+
     if(divisor!=1){
         for(auto& c :coins)
             c/=divisor;
@@ -128,9 +132,15 @@ int main(){
     if(scores.back()>=m){
         vector<int> digit_count_max(9,0);
         for(auto s :scores) {
+            vector<int> digit_count(9,0);
+
+            if(s==0){
+                digit_count_max[0]=1;
+                continue;
+            }
+
             if (s > m)
                 break;
-            vector<int> digit_count(9,0);
             while(s){
                 auto d=s%10;
                 if(d==9)
@@ -141,7 +151,7 @@ int main(){
             for(int i=0;i<=8;++i)
                 digit_count_max[i]=std::max(digit_count[i],digit_count_max[i]);
         }
-        for(int d=0;d<=9;++d){
+        for(int d=0;d<=8;++d){
             if(digit_count_max[d]>0)
                 std::cout<<d<<" "<<digit_count_max[d]<<std::endl;
         }
@@ -150,7 +160,7 @@ int main(){
         for(int d=0;d<=9;++d){
             memo.clear();
             auto ret=dfs(0,0,true,d);
-            if(ret>0){
+            if(ret>0 && d!=9){
                 std::cout<<d<<" "<<ret<<std::endl;
             }
         }
