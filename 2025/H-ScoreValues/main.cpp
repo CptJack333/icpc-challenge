@@ -36,7 +36,7 @@ int n_len;
 map<pair<int,int>,int> memo;
 long long m;
 
-int dfs(int index, int remainder, bool limit, int desired_digit){//return best_count, best_num_str
+int dfs(int index, int remainder, bool limit, int desired_digit,int leading_zeros){//return best_count, best_num_str
     if(index==n_len){
         if( remainder==0)
             return 0;
@@ -52,18 +52,22 @@ int dfs(int index, int remainder, bool limit, int desired_digit){//return best_c
     for(int d=0;d<=max_digit;++d){
         auto next_limit=limit && (d==max_digit);
         auto next_rem=(remainder*10+d)%divisor;
-        auto count=dfs(index+1,next_rem,next_limit,desired_digit);
+        auto next_lzeros=leading_zeros;
+        if(d==0 && leading_zeros==index)
+            ++next_lzeros;
+        auto count=dfs(index+1,next_rem,next_limit,desired_digit,next_lzeros);
         if(count!=-1){
             auto current_count=count;
             if(desired_digit!=6&&desired_digit!=9) {
-                if (d == desired_digit)
+                if(desired_digit==0){
+                    if(d==0 && leading_zeros<index)//当前的0不是由开头连到这个位置的
+                        ++current_count;
+                } else if (d == desired_digit)
                     ++current_count;
             }else{
                 if(d==6||d==9)
                     ++current_count;
             }
-//            if (d == desired_digit)
-//                ++current_count;
             best_count=std::max(best_count,current_count);
         }
     }
@@ -159,7 +163,7 @@ int main(){
 //否则，用数位dp，对每一个数字，测试最长能达到的长度
         for(int d=0;d<=9;++d){
             memo.clear();
-            auto ret=dfs(0,0,true,d);
+            auto ret=dfs(0,0,true,d,0);
             if(ret>0 && d!=9){
                 std::cout<<d<<" "<<ret<<std::endl;
             }
