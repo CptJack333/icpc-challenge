@@ -95,7 +95,10 @@ def analyze_digits(arr):
         cnt = defaultdict(int)
         for ch in s:
             d = int(ch)
-            cnt[d] += 1
+            if(d!=6 and d!=9):
+                cnt[d] += 1
+            else:
+                cnt[6]+=1
 
         # 打印：每个数内部 0-9 出现次数
         # print(f"数字 {num} 的数字统计: {dict(cnt)}")
@@ -109,7 +112,7 @@ def analyze_digits(arr):
 
     # 输出最终结果
     print("\n===== 整个数组的最终结果 =====")
-    for d in range(10):
+    for d in range(9):
         print(f"数字 {d} 在单个数字中最多出现 {max_count[d]} 次 → 出现在数字 {max_num[d]} 中")
 
     return max_count, max_num
