@@ -38,7 +38,8 @@ def get_reachable_under_frobenius(coins):
     # 检查是否整体互质
     g = reduce(math.gcd, coins)
     if g != 1:
-        return [], float('inf')  # 不互质 → 有无穷多不能凑的数
+        # return [], float('inf')  # 不互质 → 有无穷多不能凑的数
+        coins=[c/g for c in coins]
 
     # 安全上界：最大硬币的平方
     max_coin = max(coins)
@@ -62,7 +63,7 @@ def get_reachable_under_frobenius(coins):
             break
 
     # 所有 < frob 且能凑出的数（不含0可以自己去掉）
-    reachable = [x for x in range(frob) if dp[x]]
+    reachable = [x*g for x in range(frob) if dp[x]]
     return reachable, frob
 
 
