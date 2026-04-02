@@ -7,6 +7,8 @@
 
 using std::string;
 using std::cin;
+using std::cout;
+using std::endl;
 using std::vector;
 using std::map;
 using std::pair;
@@ -49,18 +51,20 @@ int dfs(int index, int remainder, bool limit, int desired_digit){//return best_c
         auto count=dfs(index+1,next_rem,next_limit,desired_digit);
         if(count!=-1){
             auto current_count=count;
-            if(desired_digit!=6&&desired_digit!=9) {
-                if (d == desired_digit)
-                    ++current_count;
-            }else{
-                if(d==6||d==9)
-                    ++current_count;
-            }
+//            if(desired_digit!=6&&desired_digit!=9) {
+//                if (d == desired_digit)
+//                    ++current_count;
+//            }else{
+//                if(d==6||d==9)
+//                    ++current_count;
+//            }
+            if (d == desired_digit)
+                ++current_count;
             best_count=std::max(best_count,current_count);
         }
     }
-//    if(best_count==-1)
-//        return -1;
+    if(best_count==-1)
+        return -1;
     if(!limit)
         memo[key]=best_count;
     return best_count;
@@ -76,8 +80,10 @@ int main(){
     int gcd= vector_gcd(p);
 
     divisor= gcd;
+    cout<<"gcd "<<gcd<<endl;
     upper_bound=m;
     s_limit=std::to_string(upper_bound);
+    cout<<"s_limit "<<s_limit<<endl;
     n_len=s_limit.size();
 
     for(int d=0;d<=8;++d){
