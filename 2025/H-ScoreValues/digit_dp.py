@@ -5,8 +5,8 @@ sys.setrecursionlimit(5000)
 
 def solve():
     # 问题参数
-    divisor = 2
-    upper_bound = 1000  # 对应字面值 10e18
+    divisor = 1514
+    upper_bound = 3*10**18  # 对应字面值 10e18
 
     ans=[]
 

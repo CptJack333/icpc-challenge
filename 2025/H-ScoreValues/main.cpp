@@ -36,7 +36,6 @@ int n_len;
 map<pair<int,int>,int> memo;
 
 int dfs(int index, int remainder, bool limit, int desired_digit){//return best_count, best_num_str
-    memo.clear();
     if(index==n_len){
         if( remainder==0)
             return 0;
@@ -91,6 +90,7 @@ int main(){
     n_len=s_limit.size();
 
     for(int d=0;d<=9;++d){
+        memo.clear();
         auto ret=dfs(0,0,true,d);
         if(ret>0){
             std::cout<<d<<" "<<ret<<std::endl;
