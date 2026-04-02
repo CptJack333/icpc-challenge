@@ -115,7 +115,25 @@ int main(){
     auto scores= get_reachable_score_under_frobenius_number(p);
 //如果m< Frobenius数，只需要处理小面值
     if(scores.back()>m){
-
+        vector<int> digit_count_max(9,0);
+        for(auto s :scores) {
+            if (s > m)
+                break;
+            vector<int> digit_count(9,0);
+            while(s){
+                auto d=s%10;
+                if(d==9)
+                    d=6;
+                s/=10;
+                ++digit_count[d];
+            }
+            for(int i=0;i<=8;++i)
+                digit_count_max[i]=std::max(digit_count[i],digit_count_max[i]);
+        }
+        for(int d=0;d<=9;++d){
+            if(digit_count_max[d]>0)
+                std::cout<<d<<" "<<digit_count_max[d]<<std::endl;
+        }
     }else{
 //否则，用数位dp，对每一个数字，测试最长能达到的长度
         for(int d=0;d<=9;++d){
@@ -125,9 +143,7 @@ int main(){
                 std::cout<<d<<" "<<ret<<std::endl;
             }
         }
-
     }
-
 
     return 0;
 }
