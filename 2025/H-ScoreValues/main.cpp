@@ -164,6 +164,21 @@ int main(){
         for(int d=0;d<=8;++d){
             memo.clear();
             auto ret=dfs(0,0,true,d,0);
+            auto mm=m;
+            auto cnt=0;
+            while(mm){
+                auto dd=mm%10;
+                if(d!=6) {
+                    if (dd == d)
+                        ++cnt;
+                }else{
+                    if(dd==6||dd==9)
+                        ++cnt;
+                }
+
+                mm/=10;
+            }
+            ret=std::max(ret,cnt);
             if(ret>0 && d!=9){
                 std::cout<<d<<" "<<ret<<std::endl;
             }
