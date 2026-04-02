@@ -34,6 +34,7 @@ long long upper_bound;
 string s_limit;
 int n_len;
 map<pair<int,int>,int> memo;
+long long m;
 
 int dfs(int index, int remainder, bool limit, int desired_digit){//return best_count, best_num_str
     if(index==n_len){
@@ -54,15 +55,15 @@ int dfs(int index, int remainder, bool limit, int desired_digit){//return best_c
         auto count=dfs(index+1,next_rem,next_limit,desired_digit);
         if(count!=-1){
             auto current_count=count;
-//            if(desired_digit!=6&&desired_digit!=9) {
-//                if (d == desired_digit)
-//                    ++current_count;
-//            }else{
-//                if(d==6||d==9)
-//                    ++current_count;
-//            }
-            if (d == desired_digit)
-                ++current_count;
+            if(desired_digit!=6&&desired_digit!=9) {
+                if (d == desired_digit)
+                    ++current_count;
+            }else{
+                if(d==6||d==9)
+                    ++current_count;
+            }
+//            if (d == desired_digit)
+//                ++current_count;
             best_count=std::max(best_count,current_count);
         }
     }
@@ -73,29 +74,60 @@ int dfs(int index, int remainder, bool limit, int desired_digit){//return best_c
     return best_count;
 }
 
+vector<long long> get_reachable_score_under_frobenius_number(vector<int> coins){
+    if(divisor!=1){
+        for(auto& c :coins)
+            c/=divisor;
+    }
+    auto max_coin=*max_element(coins.begin(), coins.end());
+    auto upper=std::min((long long)max_coin*max_coin,m+1);
+    vector<long long> dp(upper,false);
+    dp[0]=true;
+    for(int i=0;i<upper;++i){
+        if(dp[i])
+            for(auto c :coins)
+                if(i+c<upper)
+                    dp[i+c]=true;
+    }
+    vector<long long>ret;
+    for(int i=0;i<upper;++i){
+        if(dp[i])
+            ret.push_back(i*divisor);
+    }
+    return ret;
+}
+
 int main(){
-    long long m;
     int n;
     cin>>m>>n;
     vector<int> p(n);
     for(int i=0;i<n;++i)
         cin>>p[i];
-    int gcd= vector_gcd(p);
 
-    divisor= gcd;
-    cout<<"gcd "<<gcd<<endl;
+    divisor= vector_gcd(p);
+//    cout<<"gcd "<<gcd<<endl;
     upper_bound=m;
     s_limit=std::to_string(upper_bound);
-    cout<<"s_limit "<<s_limit<<endl;
+//    cout<<"s_limit "<<s_limit<<endl;
     n_len=s_limit.size();
 
-    for(int d=0;d<=9;++d){
-        memo.clear();
-        auto ret=dfs(0,0,true,d);
-        if(ret>0){
-            std::cout<<d<<" "<<ret<<std::endl;
+//列出Frobenius数以下的，可以拼出的面值
+    auto scores= get_reachable_score_under_frobenius_number(p);
+//如果m< Frobenius数，只需要处理小面值
+    if(scores.back()>m){
+
+    }else{
+//否则，用数位dp，对每一个数字，测试最长能达到的长度
+        for(int d=0;d<=9;++d){
+            memo.clear();
+            auto ret=dfs(0,0,true,d);
+            if(ret>0){
+                std::cout<<d<<" "<<ret<<std::endl;
+            }
         }
+
     }
+
 
     return 0;
 }
