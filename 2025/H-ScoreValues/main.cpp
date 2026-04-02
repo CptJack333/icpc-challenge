@@ -36,10 +36,15 @@ int n_len;
 map<pair<int,int>,int> memo;
 long long m;
 
+int head_di=-1;
 int dfs(int index, int remainder, bool limit, int desired_digit,int leading_zeros){//return best_count, best_num_str
     if(index==n_len){
-        if( remainder==0)
+        if( remainder==0) {
+            if(desired_digit==0 && head_di==1)
+                asm("int $0x3");
+
             return 0;
+        }
         else
             return -1;
     }
@@ -50,6 +55,11 @@ int dfs(int index, int remainder, bool limit, int desired_digit,int leading_zero
     int max_digit=limit? s_limit[index]-'0':9;
     auto best_count=-1;
     for(int d=0;d<=max_digit;++d){
+        if(index==0) {
+            head_di = d;
+            if(head_di==1) asm("int $0x3");
+
+        }
         auto next_limit=limit && (d==max_digit);
         auto next_rem=(remainder*10+d)%divisor;
         auto next_lzeros=leading_zeros;
