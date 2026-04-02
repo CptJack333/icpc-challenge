@@ -70,7 +70,7 @@ int dfs(int index, int remainder, bool limit, int desired_digit,int leading_zero
             auto current_count=count;
             if(desired_digit!=6&&desired_digit!=9) {
                 if(desired_digit==0){
-                    if(d==0 && leading_zeros<index)//当前的0不是由开头连到这个位置的
+                    if(d==0 && next_lzeros<index+1)//当前的0不是由开头连到这个位置的
                         ++current_count;
                 } else if (d == desired_digit)
                     ++current_count;
@@ -171,7 +171,7 @@ int main(){
         }
     }else{
 //否则，用数位dp，对每一个数字，测试最长能达到的长度
-        for(int d=0;d<=9;++d){
+        for(int d=0;d<=8;++d){
             memo.clear();
             auto ret=dfs(0,0,true,d,0);
             if(ret>0 && d!=9){
