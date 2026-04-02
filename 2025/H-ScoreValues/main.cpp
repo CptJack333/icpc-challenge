@@ -33,7 +33,6 @@ int divisor;
 long long upper_bound;
 string s_limit;
 int n_len;
-map<pair<int,int>,int> memo;
 long long m;
 
 map<std::tuple<int, int, bool, bool>, pair<int, string>> memo0;
@@ -97,47 +96,76 @@ pair<int, string> dfs0(int idx, int rem, bool limit, bool started) {
     return {best_zeros, best_num};
 }
 
-int dfs(int index, int remainder, bool limit, int desired_digit,int leading_zeros){//return best_count, best_num_str
-    if(index==n_len){
-        if( remainder==0)
-            return 0;
-        else
-            return -1;
+map<pair<int, int>, pair<int, string>> memo;
+
+// 返回值: pair<最大计数, 对应的数字字符串>
+// 返回值: pair<最大计数, 对应的数字字符串>
+pair<int, string> dfs(int idx, int rem, bool limit, int desired_digit) {
+    // 1. 基本情况
+    if (idx == n_len) {
+        if (rem == 0) {
+            return {0, ""}; // 找到解，返回计数0和空字符串
+        } else {
+            return {-1, ""}; // 无效解
+        }
     }
-    auto key =std::make_pair(index,remainder);
-    if (!limit && memo.count(key)){
+
+    // 2. 记忆化查询
+    auto key = make_pair(idx, rem);
+    if (!limit && memo.count(key)) {
         return memo[key];
     }
-    int max_digit=limit? s_limit[index]-'0':9;
-    auto best_count=-1;
-    for(int d=0;d<=max_digit;++d){
-        auto next_limit=limit && (d==max_digit);
-        auto next_rem=(remainder*10+d)%divisor;
-        auto next_lzeros=leading_zeros;
-        if(d==0 && leading_zeros==index)
-            ++next_lzeros;
-        auto count=dfs(index+1,next_rem,next_limit,desired_digit,next_lzeros);
-        if(count!=-1){
-            auto current_count=count;
+
+    // 3. 确定当前位上限
+    int max_digit = limit ? (s_limit[idx] - '0') : 9;
+
+    int best_count = -1;
+    string best_num_str = "";
+
+    // 4. 枚举数字
+    for (int d = 0; d <= max_digit; ++d) {
+        bool next_limit = limit && (d == max_digit);
+        int next_rem = (rem * 10 + d) % divisor;
+
+        // 递归调用
+        auto result = dfs(idx + 1, next_rem, next_limit, desired_digit);
+        int count = result.first;
+        string suffix = result.second;
+
+        if (count != -1) {
+            // 修正：忠实还原 Python 的计数逻辑
+            int current_count = count;
             if(desired_digit!=6&&desired_digit!=9) {
-                if(desired_digit==0){
-                    if(d==0 && next_lzeros<index+1)//当前的0不是由开头连到这个位置的
-                        ++current_count;
-                } else if (d == desired_digit)
+                if (d == desired_digit)
                     ++current_count;
             }else{
                 if(d==6||d==9)
                     ++current_count;
             }
-            best_count=std::max(best_count,current_count);
+
+            // 修正：还原 Python 的更新逻辑
+            // 只有当计数严格大于当前最优时才更新
+            // 这样配合 d 从 0->9 的循环，保证了 count 相同时保留字典序较小的解
+            if (current_count > best_count) {
+                best_count = current_count;
+                best_num_str = std::to_string(d) + suffix;
+            }
         }
     }
-    if(best_count==-1)
-        return -1;
-    if(!limit)
-        memo[key]=best_count;
-    return best_count;
+
+    // 5. 存储并返回
+    if (best_count == -1) {
+        return {-1, ""};
+    }
+
+    if (!limit) {
+        memo[key] = {best_count, best_num_str};
+    }
+
+    return {best_count, best_num_str};
 }
+
+
 
 vector<long long> get_reachable_score_under_frobenius_number(vector<int> coins){
      if(coins.size()==1){
@@ -225,10 +253,10 @@ int main(){
         for(int d=0;d<=8;++d){
             memo.clear();
             int ret;
-            if(d!=0)
-                ret=dfs(0,0,true,d,0);
-            else {
-                string res;
+            if(d!=0) {
+                auto result = dfs(0, 0, true, d);
+                ret=result.first;
+            } else {
                 auto result = dfs0(0, 0, true, false);
                 ret=result.first;
             }
