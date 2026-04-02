@@ -91,8 +91,19 @@ vector<long long> get_reachable_score_under_frobenius_number(vector<int> coins){
     }
     vector<long long>ret;
     for(int i=0;i<upper;++i){
-        if(dp[i])
-            ret.push_back(i*divisor);
+        if(dp[i]){
+            auto score=i*divisor;
+            bool capped=false;
+            if(score>m){
+                capped=true;
+                score=m;
+                if(ret.back()!=score)
+                    ret.push_back(score);
+            }else
+                ret.push_back(score);
+            if(capped)
+                break;
+        }
     }
     return ret;
 }
@@ -114,7 +125,7 @@ int main(){
 //列出Frobenius数以下的，可以拼出的面值
     auto scores= get_reachable_score_under_frobenius_number(p);
 //如果m< Frobenius数，只需要处理小面值
-    if(scores.back()>m){
+    if(scores.back()>=m){
         vector<int> digit_count_max(9,0);
         for(auto s :scores) {
             if (s > m)
