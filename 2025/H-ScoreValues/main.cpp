@@ -33,65 +33,45 @@ int divisor;
 long long upper_bound;
 string s_limit;
 int n_len;
-map<pair<int,int>,pair<int,string>> memo;
+map<pair<int,int>,int> memo;
 
-pair<int, string> dfs(int idx, int rem, bool limit, int desired_digit) {
+int dfs(int index, int remainder, bool limit, int desired_digit){//return best_count, best_num_str
     memo.clear();
-    // 1. 基本情况
-    if (idx == n_len) {
-        if (rem == 0) {
-            return {0, ""}; // 找到解，返回计数0和空字符串
-        } else {
-            return {-1, ""}; // 无效解
-        }
+    if(index==n_len){
+        if( remainder==0)
+            return 0;
+        else
+            return -1;
     }
-
-    // 2. 记忆化查询
-    auto key = make_pair(idx, rem);
-    if (!limit && memo.count(key)) {
+    auto key =std::make_pair(index,remainder);
+    if (!limit && memo.count(key)){
         return memo[key];
     }
-
-    // 3. 确定当前位上限
-    int max_digit = limit ? (s_limit[idx] - '0') : 9;
-
-    int best_count = -1;
-    string best_num_str = "";
-
-    // 4. 枚举数字
-    for (int d = 0; d <= max_digit; ++d) {
-        bool next_limit = limit && (d == max_digit);
-        int next_rem = (rem * 10 + d) % divisor;
-
-        // 递归调用
-        auto result = dfs(idx + 1, next_rem, next_limit, desired_digit);
-        int count = result.first;
-        string suffix = result.second;
-
-        if (count != -1) {
-            // 修正：忠实还原 Python 的计数逻辑
-            int current_count = count + (d == desired_digit ? 1 : 0);
-
-            // 修正：还原 Python 的更新逻辑
-            // 只有当计数严格大于当前最优时才更新
-            // 这样配合 d 从 0->9 的循环，保证了 count 相同时保留字典序较小的解
-            if (current_count > best_count) {
-                best_count = current_count;
-                best_num_str = std::to_string(d) + suffix;
-            }
+    int max_digit=limit? s_limit[index]-'0':9;
+    auto best_count=-1;
+    for(int d=0;d<=max_digit;++d){
+        auto next_limit=limit && (d==max_digit);
+        auto next_rem=(remainder*10+d)%divisor;
+        auto count=dfs(index+1,next_rem,next_limit,desired_digit);
+        if(count!=-1){
+            auto current_count=count;
+//            if(desired_digit!=6&&desired_digit!=9) {
+//                if (d == desired_digit)
+//                    ++current_count;
+//            }else{
+//                if(d==6||d==9)
+//                    ++current_count;
+//            }
+            if (d == desired_digit)
+                ++current_count;
+            best_count=std::max(best_count,current_count);
         }
     }
-
-    // 5. 存储并返回
-    if (best_count == -1) {
-        return {-1, ""};
-    }
-
-    if (!limit) {
-        memo[key] = {best_count, best_num_str};
-    }
-
-    return {best_count, best_num_str};
+    if(best_count==-1)
+        return -1;
+    if(!limit)
+        memo[key]=best_count;
+    return best_count;
 }
 
 int main(){
@@ -111,9 +91,9 @@ int main(){
     n_len=s_limit.size();
 
     for(int d=0;d<=9;++d){
-        auto [ret,ss]=dfs(0,0,true,d);
+        auto ret=dfs(0,0,true,d);
         if(ret>0){
-            std::cout<<d<<" "<<ret<<" "<<ss<<std::endl;
+            std::cout<<d<<" "<<ret<<std::endl;
         }
     }
 
