@@ -36,6 +36,67 @@ int n_len;
 map<pair<int,int>,int> memo;
 long long m;
 
+map<std::tuple<int, int, bool, bool>, pair<int, string>> memo0;
+
+pair<int, string> dfs0(int idx, int rem, bool limit, bool started) {
+    // 基本情况：处理完所有位数
+    if (idx == n_len) {
+        // 如果构成了有效数字（非前导零状态）且能被整除
+        if (started && rem == 0) {
+            return {0, ""};
+        }
+        return {-1, ""}; // 无效解
+    }
+
+    // 记忆化检查
+    // 注意：只有在不受limit约束时才能使用缓存，因为limit=true的情况路径唯一
+    // started状态也必须包含在key中，或者通过逻辑处理（这里为了严谨包含进去）
+    auto key = std::make_tuple(idx, rem, limit, started);
+    if (!limit && memo0.count(key)) {
+        return memo0[key];
+    }
+
+    int max_digit = limit ? (s_limit[idx] - '0') : 9;
+
+    int best_zeros = -1;
+    string best_num = "";
+
+    // 从大到小枚举，优先找大数，在0数量相同时自动保留数值较大的解
+    for (int d = max_digit; d >= 0; --d) {
+        bool next_limit = limit && (d == max_digit);
+        bool next_started = started || (d != 0);
+
+        // 剪枝：如果还是前导零，且选了0，直接跳过（不计数）
+        if (!started && d == 0) {
+            auto res = dfs0(idx + 1, rem, next_limit, false);
+            if (res.first > best_zeros) {
+                best_zeros = res.first;
+                best_num = res.second; // 前导零不加到字符串里，或者加到最后处理
+                // 这里为了方便，我们在最终输出时处理前导零，或者逻辑上认为空字符串代表前导零部分
+                // 但为了统一，这里我们让返回的字符串不包含前导零
+            }
+        } else {
+            int next_rem = (rem * 10 + d) % divisor;
+            auto res = dfs0(idx + 1, next_rem, next_limit, true);
+
+            if (res.first != -1) {
+                int current_zeros = res.first + (d == 0 ? 1 : 0);
+                if (current_zeros > best_zeros) {
+                    best_zeros = current_zeros;
+                    best_num = std::to_string(d) + res.second;
+                }
+            }
+        }
+    }
+
+    // 存储结果
+    if (!limit) {
+        memo0[key] = {best_zeros, best_num};
+    }
+
+    return {best_zeros, best_num};
+}
+
 int dfs(int index, int remainder, bool limit, int desired_digit,int leading_zeros){//return best_count, best_num_str
     if(index==n_len){
         if( remainder==0)
@@ -163,7 +224,14 @@ int main(){
 //否则，用数位dp，对每一个数字，测试最长能达到的长度
         for(int d=0;d<=8;++d){
             memo.clear();
-            auto ret=dfs(0,0,true,d,0);
+            int ret;
+            if(d!=0)
+                ret=dfs(0,0,true,d,0);
+            else {
+                string res;
+                auto result = dfs0(0, 0, true, false);
+                ret=result.first;
+            }
             auto mm=m;
             auto cnt=0;
             while(mm){
