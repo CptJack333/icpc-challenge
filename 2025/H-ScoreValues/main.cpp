@@ -34,6 +34,7 @@ long long upper_bound;
 string s_limit;
 int n_len;
 long long m;
+long long frobenius;
 
 map<std::tuple<int, int, bool, bool>, pair<int, string>> memo0;
 
@@ -96,6 +97,28 @@ pair<int, string> dfs0(int idx, int rem, bool limit, bool started) {
     return {best_zeros, best_num};
 }
 
+// num：数字
+// totalLen：补0后总长度
+// pos：取第几位（从左 1 开始）
+int getPaddedDigit(long long num, int totalLen, int pos) {
+    // 转字符串
+    string s = std::to_string(num);
+
+    // 左侧补 0 到 totalLen 位
+    if (s.size() < totalLen) {
+        s = string(totalLen - s.size(), '0') + s;
+    }
+
+    // 越界判断
+    if (pos < 1 || pos > s.size()) {
+        return -1;
+    }
+
+    // 返回第 pos 位数字
+    return s[pos] - '0';
+}
+
+
 map<pair<int, int>, pair<int, string>> memo;
 
 // 返回值: pair<最大计数, 对应的数字字符串>
@@ -123,7 +146,8 @@ pair<int, string> dfs(int idx, int rem, bool limit, int desired_digit) {
     string best_num_str = "";
 
     // 4. 枚举数字
-    for (int d = 0; d <= max_digit; ++d) {
+    int min_digit= getPaddedDigit(frobenius+1,n_len,idx);
+    for (int d = min_digit; d <= max_digit; ++d) {
         bool next_limit = limit && (d == max_digit);
         int next_rem = (rem * 10 + d) % divisor;
 
@@ -224,8 +248,9 @@ int main(){
 //列出Frobenius数以下的，可以拼出的面值
     auto r_frob= get_reachable_score_under_frobenius_number(p);
     auto [scores,frob]= r_frob;
+    frobenius=frob;
 //如果m< Frobenius数，只需要处理小面值
-     if(frob>=m){
+     if(frobenius>=m){
         vector<int> digit_count_max(9,0);
         for(auto s :scores) {
             vector<int> digit_count(9,0);
