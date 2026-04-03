@@ -229,35 +229,44 @@ int main(){
 
 
 
-
+    vector<pair<int,string>> results(9);
 //否则，用数位dp，对每一个数字，测试最长能达到的长度
-    for(int d=0;d<=8;++d){
-        memo.clear();
-        int ret;
-//            深度优先数位dp
-        pair<int,string> result;
-        result = dfs(0, 0, true,true, d,d!=0);
-        ret=result.first;
-//            不要忘了有截断的情况存在
-        auto mm=m;
-        auto cnt=0;
-        while(mm){
-            auto dd=mm%10;
-            if(d!=6) {
-                if (dd == d)
-                    ++cnt;
-            }else{
-                if(dd==6||dd==9)
-                    ++cnt;
-            }
+    if(frobenius<m)
+        for(int d=0;d<=8;++d){
+            memo.clear();
+            int ret;
+    //            深度优先数位dp
+            pair<int,string> result;
+            result = dfs(0, 0, true,true, d,d!=0);
+            results[d]=result;
+            ret=result.first;
+    //            不要忘了有截断的情况存在
+            auto mm=m;
+            auto cnt=0;
+            while(mm){
+                auto dd=mm%10;
+                if(d!=6) {
+                    if (dd == d)
+                        ++cnt;
+                }else{
+                    if(dd==6||dd==9)
+                        ++cnt;
+                }
 
-            mm/=10;
+                mm/=10;
+            }
+            if(cnt>ret){
+                results[d].first=cnt;
+                results[d].second=std::to_string(m);
+            }
         }
-        ret=std::max(ret,cnt);
-        ret=std::max(digit_count_max[d],ret);
+
+    for(int d=0;d<=8;++d) {
+        auto ret=results[d].first;
+        ret = std::max(digit_count_max[d], ret);
 //输出结果
-        if(ret>0){
-            std::cout<<d<<" "<<ret<<std::endl;
+        if (ret > 0) {
+            std::cout << d << " " << ret << std::endl;
 //            std::cout<<result.second<<std::endl;
         }
     }
