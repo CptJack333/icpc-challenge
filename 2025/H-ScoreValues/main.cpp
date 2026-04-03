@@ -62,7 +62,7 @@ map<pair<int, int>, pair<int, string>> memo;
 
 // 返回值: pair<最大计数, 对应的数字字符串>
 // 返回值: pair<最大计数, 对应的数字字符串>
-pair<int, string> dfs(int idx, int rem, bool limit, int desired_digit,bool started0) {
+pair<int, string> dfs(int idx, int rem, bool upper_limit, bool lower_limit, int desired_digit, bool started0) {
     // 1. 基本情况
     if (idx == n_len) {
         if (rem == 0) {
@@ -74,31 +74,32 @@ pair<int, string> dfs(int idx, int rem, bool limit, int desired_digit,bool start
 
     // 2. 记忆化查询
     auto key = make_pair(idx, rem);
-    if (!limit && memo.count(key)) {
+    if (!upper_limit && !lower_limit && memo.count(key)) {
         return memo[key];
     }
 
     // 3. 确定当前位上限
-    int max_digit = limit ? (s_limit[idx] - '0') : 9;
+    int max_digit = upper_limit ? (s_limit[idx] - '0') : 9;
+    int min_digit= lower_limit? getPaddedDigit(frobenius+1,n_len,idx) :0;
 
     int best_count = -1;
     string best_num_str = "";
 
     // 4. 枚举数字
-    int min_digit= getPaddedDigit(frobenius+1,n_len,idx);
-    for (int d = 0; d <= max_digit; ++d) {
-        bool next_limit = limit && (d == max_digit);
+    for (int d = min_digit; d <= max_digit; ++d) {
+        bool next_limit = upper_limit && (d == max_digit);
+        bool next_limit2 = lower_limit && (d == min_digit);
         int next_rem = (rem * 10 + d) % divisor;
         bool next_started = d!=0 || started0;
 
         // 递归调用
-        auto result = dfs(idx + 1, next_rem, next_limit, desired_digit,next_started);
+        auto result = dfs(idx + 1, next_rem, next_limit,next_limit2, desired_digit,next_started);
         int count = result.first;
         string suffix = result.second;
 
         // 剪枝：如果还是前导零，且选了0，直接跳过（不计数）
         if (!started0 && d == 0) {
-            auto res = dfs(idx + 1, rem, next_limit, 0, false);
+            auto res = dfs(idx + 1, rem, next_limit,next_limit2, 0, false);
             if (res.first > best_count) {
                 best_count = res.first;
                 best_num_str = res.second; // 前导零不加到字符串里，或者加到最后处理
@@ -132,7 +133,7 @@ pair<int, string> dfs(int idx, int rem, bool limit, int desired_digit,bool start
         return {-1, ""};
     }
 
-    if (!limit) {
+    if (!upper_limit && !lower_limit) {
         memo[key] = {best_count, best_num_str};
     }
 
@@ -245,7 +246,7 @@ int main(){
             int ret;
 //            深度优先数位dp
             pair<int,string> result;
-            result = dfs(0, 0, true, d,d!=0);
+            result = dfs(0, 0, true,true, d,d!=0);
             ret=result.first;
 //            不要忘了有截断的情况存在
             auto mm=m;
