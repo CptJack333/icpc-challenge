@@ -167,9 +167,9 @@ pair<int, string> dfs(int idx, int rem, bool limit, int desired_digit) {
 
 
 
-vector<long long> get_reachable_score_under_frobenius_number(vector<int> coins){
+pair<vector<long long>,long long> get_reachable_score_under_frobenius_number(vector<int> coins){
      if(coins.size()==1){
-        return {0,std::min((int)m,coins.front())};
+        return {{0,std::min((int)m,coins.front())}, -1};
     }
 
     if(divisor!=1){
@@ -177,7 +177,7 @@ vector<long long> get_reachable_score_under_frobenius_number(vector<int> coins){
             c/=divisor;
     }
     auto max_coin=*max_element(coins.begin(), coins.end());
-    auto upper=std::min((long long)max_coin*max_coin,m+1);
+    auto upper=max_coin*max_coin;
     vector<long long> dp(upper,false);
     dp[0]=true;
     for(int i=0;i<upper;++i){
@@ -186,20 +186,12 @@ vector<long long> get_reachable_score_under_frobenius_number(vector<int> coins){
                 if(i+c<upper)
                     dp[i+c]=true;
     }
+
     vector<long long>ret;
     for(int i=0;i<upper;++i){
         if(dp[i]){
             auto score=i*divisor;
-            bool capped=false;
-            if(score>m){
-                capped=true;
-                score=m;
-                if(ret.back()!=score)
-                    ret.push_back(score);
-            }else
-                ret.push_back(score);
-            if(capped)
-                break;
+            ret.push_back(score);
         }
     }
     return ret;
@@ -220,20 +212,25 @@ int main(){
     n_len=s_limit.size();
 
 //列出Frobenius数以下的，可以拼出的面值
-    auto scores= get_reachable_score_under_frobenius_number(p);
+    auto r_frob= get_reachable_score_under_frobenius_number(p);
+    auto [scores,frob]= r_frob;
 //如果m< Frobenius数，只需要处理小面值
-    if(scores.back()>=m){
+     if(frob>=m){
         vector<int> digit_count_max(9,0);
         for(auto s :scores) {
             vector<int> digit_count(9,0);
-
+            //处理score 0的特殊情况
             if(s==0){
                 digit_count_max[0]=1;
                 continue;
             }
-
-            if (s > m)
-                break;
+//处理超出m的截断分数
+            bool capped=false;
+            if (s > m){
+                s=m;
+                capped=true;
+            }
+//            按数位分解统计数字个数
             while(s){
                 auto d=s%10;
                 if(d==9)
@@ -243,7 +240,11 @@ int main(){
             }
             for(int i=0;i<=8;++i)
                 digit_count_max[i]=std::max(digit_count[i],digit_count_max[i]);
+//后面的分数都是m，截断
+            if(capped)
+                break;
         }
+//         输出各个数字的最多值
         for(int d=0;d<=8;++d){
             if(digit_count_max[d]>0)
                 std::cout<<d<<" "<<digit_count_max[d]<<std::endl;
@@ -253,13 +254,16 @@ int main(){
         for(int d=0;d<=8;++d){
             memo.clear();
             int ret;
+//            深度优先数位dp
             if(d!=0) {
                 auto result = dfs(0, 0, true, d);
                 ret=result.first;
             } else {
+//            寻找0的最大长度需要另外处理，因为前导0的存在
                 auto result = dfs0(0, 0, true, false);
                 ret=result.first;
             }
+//            不要忘了有截断的情况存在
             auto mm=m;
             auto cnt=0;
             while(mm){
@@ -275,6 +279,7 @@ int main(){
                 mm/=10;
             }
             ret=std::max(ret,cnt);
+//输出结果
             if(ret>0 && d!=9){
                 std::cout<<d<<" "<<ret<<std::endl;
             }
