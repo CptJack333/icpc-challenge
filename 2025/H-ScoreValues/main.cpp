@@ -194,7 +194,17 @@ pair<vector<long long>,long long> get_reachable_score_under_frobenius_number(vec
             ret.push_back(score);
         }
     }
-    return ret;
+
+//# 找 Frobenius 数（最大不能凑的数）
+    long long frob = -1;
+    for (long long x=upper-1;x>=0;--x) {
+        if( !dp[x]){
+            frob=x;
+            break;
+        }
+    }
+
+    return {ret,frob};
 }
 
 int main(){
@@ -255,12 +265,13 @@ int main(){
             memo.clear();
             int ret;
 //            深度优先数位dp
+            pair<int,string> result;
             if(d!=0) {
-                auto result = dfs(0, 0, true, d);
+                result = dfs(0, 0, true, d);
                 ret=result.first;
             } else {
 //            寻找0的最大长度需要另外处理，因为前导0的存在
-                auto result = dfs0(0, 0, true, false);
+                result = dfs0(0, 0, true, false);
                 ret=result.first;
             }
 //            不要忘了有截断的情况存在
@@ -280,7 +291,7 @@ int main(){
             }
             ret=std::max(ret,cnt);
 //输出结果
-            if(ret>0 && d!=9){
+            if(ret>0){
                 std::cout<<d<<" "<<ret<<std::endl;
             }
         }
