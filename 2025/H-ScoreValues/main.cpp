@@ -48,11 +48,6 @@ int getPaddedDigit(long long num, int totalLen, int pos) {
         s = string(totalLen - s.size(), '0') + s;
     }
 
-    // 越界判断
-    if (pos < 1 || pos > s.size()) {
-        return -1;
-    }
-
     // 返回第 pos 位数字
     return s[pos] - '0';
 }
@@ -200,74 +195,70 @@ int main(){
     auto r_frob= get_reachable_score_under_frobenius_number(p);
     auto [scores,frob]= r_frob;
     frobenius=frob;
-
+//    std::cout<<"frobenius num "<<frobenius<<std::endl;
 //如果m< Frobenius数，只需要处理小面值
-     if(frobenius>=m){
-        vector<int> digit_count_max(9,0);
-        for(auto s :scores) {
-            vector<int> digit_count(9,0);
-            //处理score 0的特殊情况
-            if(s==0){
-                digit_count_max[0]=1;
-                continue;
-            }
+    vector<int> digit_count_max(9,0);
+    for(auto s :scores) {
+        vector<int> digit_count(9,0);
+        //处理score 0的特殊情况
+        if(s==0){
+            digit_count_max[0]=1;
+            continue;
+        }
 //处理超出m的截断分数
-            bool capped=false;
-            if (s > m){
-                s=m;
-                capped=true;
-            }
+        bool capped=false;
+        if (s > m){
+            s=m;
+            capped=true;
+        }
 //            按数位分解统计数字个数
-            while(s){
-                auto d=s%10;
-                if(d==9)
-                    d=6;
-                s/=10;
-                ++digit_count[d];
-            }
-            for(int i=0;i<=8;++i)
-                digit_count_max[i]=std::max(digit_count[i],digit_count_max[i]);
+        while(s){
+            auto d=s%10;
+            if(d==9)
+                d=6;
+            s/=10;
+            ++digit_count[d];
+        }
+        for(int i=0;i<=8;++i)
+            digit_count_max[i]=std::max(digit_count[i],digit_count_max[i]);
 //后面的分数都是m，截断
-            if(capped)
-                break;
-        }
-//         输出各个数字的最多值
-        for(int d=0;d<=8;++d){
-            if(digit_count_max[d]>0)
-                std::cout<<d<<" "<<digit_count_max[d]<<std::endl;
-        }
+        if(capped)
+            break;
+    }
 
 
 
-    }else{
+
+
 //否则，用数位dp，对每一个数字，测试最长能达到的长度
-        for(int d=0;d<=8;++d){
-            memo.clear();
-            int ret;
+    for(int d=0;d<=8;++d){
+        memo.clear();
+        int ret;
 //            深度优先数位dp
-            pair<int,string> result;
-            result = dfs(0, 0, true,true, d,d!=0);
-            ret=result.first;
+        pair<int,string> result;
+        result = dfs(0, 0, true,true, d,d!=0);
+        ret=result.first;
 //            不要忘了有截断的情况存在
-            auto mm=m;
-            auto cnt=0;
-            while(mm){
-                auto dd=mm%10;
-                if(d!=6) {
-                    if (dd == d)
-                        ++cnt;
-                }else{
-                    if(dd==6||dd==9)
-                        ++cnt;
-                }
+        auto mm=m;
+        auto cnt=0;
+        while(mm){
+            auto dd=mm%10;
+            if(d!=6) {
+                if (dd == d)
+                    ++cnt;
+            }else{
+                if(dd==6||dd==9)
+                    ++cnt;
+            }
 
-                mm/=10;
-            }
-            ret=std::max(ret,cnt);
+            mm/=10;
+        }
+        ret=std::max(ret,cnt);
+        ret=std::max(digit_count_max[d],ret);
 //输出结果
-            if(ret>0){
-                std::cout<<d<<" "<<ret<<std::endl;
-            }
+        if(ret>0){
+            std::cout<<d<<" "<<ret<<std::endl;
+//            std::cout<<result.second<<std::endl;
         }
     }
 
