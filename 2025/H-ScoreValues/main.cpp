@@ -139,7 +139,7 @@ pair<int, string> dfs(int idx, int rem, bool upper_limit, bool lower_limit, int 
 
 pair<vector<long long>,long long> get_reachable_score_under_frobenius_number(vector<int> coins){
      if(coins.size()==1){
-        return {{0,std::min((int)m,coins.front())}, -1};
+        return {{0}, -1};
     }
 
     if(divisor!=1){
