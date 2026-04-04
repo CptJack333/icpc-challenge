@@ -112,9 +112,6 @@ pair<int, string> dfs(int idx, int rem, bool upper_limit, bool lower_limit, int 
                         ++current_count;
                 }
 
-                // 修正：还原 Python 的更新逻辑
-                // 只有当计数严格大于当前最优时才更新
-                // 这样配合 d 从 0->9 的循环，保证了 count 相同时保留字典序较小的解
                 if (current_count > best_count) {
                     best_count = current_count;
                     best_num_str = std::to_string(d) + suffix;
@@ -134,8 +131,6 @@ pair<int, string> dfs(int idx, int rem, bool upper_limit, bool lower_limit, int 
 
     return {best_count, best_num_str};
 }
-
-
 
 pair<vector<long long>,long long> get_reachable_score_under_frobenius_number(vector<int> coins){
      if(coins.size()==1){
@@ -165,7 +160,7 @@ pair<vector<long long>,long long> get_reachable_score_under_frobenius_number(vec
         }
     }
 
-//# 找 Frobenius 数（最大不能凑的数）
+//# 找 Frobenius 数
     long long frob = -1;
     for (long long x=upper-1;x>=0;--x) {
         if( !dp[x]){
