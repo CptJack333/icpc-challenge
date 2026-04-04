@@ -139,7 +139,7 @@ pair<int, string> dfs(int idx, int rem, bool upper_limit, bool lower_limit, int 
 
 pair<vector<long long>,long long> get_reachable_score_under_frobenius_number(vector<int> coins){
      if(coins.size()==1){
-        return {{0}, -1};
+        return {{0, coins.front()}, -1};
     }
 
     if(divisor!=1){
@@ -169,13 +169,15 @@ pair<vector<long long>,long long> get_reachable_score_under_frobenius_number(vec
     long long frob = -1;
     for (long long x=upper-1;x>=0;--x) {
         if( !dp[x]){
-            frob=x;
+            frob=divisor*x;
             break;
         }
     }
 
     return {ret,frob};
 }
+
+bool debug =false;
 
 int main(){
     int n;
@@ -195,14 +197,19 @@ int main(){
     auto r_frob= get_reachable_score_under_frobenius_number(p);
     auto [scores,frob]= r_frob;
     frobenius=frob;
-//    std::cout<<"frobenius num "<<frobenius<<std::endl;
+    if(debug) {
+        std::cout << "frobenius num " << frobenius << std::endl;
+        std::cout << "gcd " << divisor << std::endl << std::endl;
+    }
+
+    vector<pair<int,string>> results(9);
 //如果m< Frobenius数，只需要处理小面值
-    vector<int> digit_count_max(9,0);
     for(auto s :scores) {
         vector<int> digit_count(9,0);
         //处理score 0的特殊情况
         if(s==0){
-            digit_count_max[0]=1;
+            results[0].first=1;
+            results[0].second="0";
             continue;
         }
 //处理超出m的截断分数
@@ -211,6 +218,7 @@ int main(){
             s=m;
             capped=true;
         }
+        auto ss=s;
 //            按数位分解统计数字个数
         while(s){
             auto d=s%10;
@@ -219,27 +227,24 @@ int main(){
             s/=10;
             ++digit_count[d];
         }
-        for(int i=0;i<=8;++i)
-            digit_count_max[i]=std::max(digit_count[i],digit_count_max[i]);
+        for(int d=0; d <= 8; ++d){
+            if(digit_count[d] > results[d].first){
+                results[d].first=digit_count[d];
+                results[d].second=std::to_string(ss);
+            }
+        }
 //后面的分数都是m，截断
         if(capped)
             break;
     }
 
-
-
-
-    vector<pair<int,string>> results(9);
 //否则，用数位dp，对每一个数字，测试最长能达到的长度
-    if(frobenius<m)
+    if(frobenius+divisor<m)
         for(int d=0;d<=8;++d){
             memo.clear();
-            int ret;
     //            深度优先数位dp
             pair<int,string> result;
             result = dfs(0, 0, true,true, d,d!=0);
-            results[d]=result;
-            ret=result.first;
     //            不要忘了有截断的情况存在
             auto mm=m;
             auto cnt=0;
@@ -255,19 +260,22 @@ int main(){
 
                 mm/=10;
             }
-            if(cnt>ret){
-                results[d].first=cnt;
-                results[d].second=std::to_string(m);
+            if(cnt>result.first){
+                result.first=cnt;
+                result.second=std::to_string(m);
             }
+
+            if(result.first>results[d].first)
+                results[d]=result;
         }
 
     for(int d=0;d<=8;++d) {
         auto ret=results[d].first;
-        ret = std::max(digit_count_max[d], ret);
 //输出结果
         if (ret > 0) {
             std::cout << d << " " << ret << std::endl;
-//            std::cout<<result.second<<std::endl;
+        if(debug)
+            std::cout<<results[d].second<<std::endl;
         }
     }
 
