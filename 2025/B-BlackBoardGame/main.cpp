@@ -61,22 +61,37 @@ bool dfs(int num, int n,int round, const vector<bool>& isPrime, vector<bool>& us
 int main(){
     int t;
     cin>>t;
+//    t=1;
     for(int case_i=0;case_i<t;++case_i){
         int n;
         cin>>n;
+//        n=12;
         auto isPrime= gen_prime(n);
 
-        bool first_win=false;
-        for(auto strategy=2;strategy<=n;strategy+=2){
-            vector<bool> used(n+1,false);
-            used[strategy]=true;
-            if(dfs(strategy,n,0,isPrime,used)) {
-                cout << "first " << strategy << endl;
-                first_win=true;
-                break;
+        if(n<176){
+            bool first_win = false;
+            for (auto strategy = 2; strategy <= n; strategy += 2) {
+                vector<bool> used(n + 1, false);
+                used[strategy] = true;
+                if (dfs(strategy, n, 0, isPrime, used)) {
+                    cout << "first " << strategy << endl;
+                    first_win = true;
+                    break;
+                }
             }
+            if (!first_win)
+                cout << "second" << endl;
+        }else{
+            vector<int> pri;
+            for (auto p = n / 4; p <= n / 3; ++p) {
+                if (!isPrime[p])continue;
+                pri.push_back(p);
+                if (pri.size() >= 3)break;
+            }
+            if (pri.size() >= 3)
+                cout<<"first "<<pri.front()*2<<endl;
+            else
+                cout<<"second";
         }
-        if(!first_win)
-            cout<<"second"<<endl;
     }
 }
