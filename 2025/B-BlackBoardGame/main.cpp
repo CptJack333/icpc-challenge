@@ -69,7 +69,7 @@ int main(){
     for(int case_i=0;case_i<t;++case_i){
         int n;
         cin>>n;
-//        n=138;
+//        n=176;
         auto isPrime= gen_prime(n);
 
         if(n<84){
@@ -87,17 +87,11 @@ int main(){
                 cout << "second" << endl;
         }else{
             vector<int> pri;
-            for (auto p = n / 4; p <= n / 3; ++p) {
-                if (!isPrime[p])continue;
-                pri.push_back(p);
-                if (pri.size() >= 3)break;
-            }
-            if (pri.size() >= 3) {
-                cout << "first " << pri.front() * 2 << endl;
-//                printf("%d %d %d\n",pri[0],pri[1],pri[2]);
-            }
-            else
-                cout<<"second"<<endl;
+            for (auto p = n / 3; ; --p)
+                if (isPrime[p]) {
+                    cout << "first " << p * 2 << endl;
+                    break;
+                }
         }
     }
 }
