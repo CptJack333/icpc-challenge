@@ -20,6 +20,10 @@ vector<bool> gen_prime(int n){
 // round: 0 first 1 second
 bool dfs(int num, int n,int round, const vector<bool>& isPrime, vector<bool>& used){
     vector<int> available_move;
+
+    if(isPrime[num] && !used[1])
+        available_move.push_back(1);
+
     for(int p=2;p*num<=n;++p){
         if(isPrime[p] && !used[p*num])
             available_move.push_back(p*num);
@@ -65,10 +69,10 @@ int main(){
     for(int case_i=0;case_i<t;++case_i){
         int n;
         cin>>n;
-//        n=12;
+//        n=138;
         auto isPrime= gen_prime(n);
 
-        if(n<176){
+        if(n<84){
             bool first_win = false;
             for (auto strategy = 2; strategy <= n; strategy += 2) {
                 vector<bool> used(n + 1, false);
@@ -88,10 +92,12 @@ int main(){
                 pri.push_back(p);
                 if (pri.size() >= 3)break;
             }
-            if (pri.size() >= 3)
-                cout<<"first "<<pri.front()*2<<endl;
+            if (pri.size() >= 3) {
+                cout << "first " << pri.front() * 2 << endl;
+//                printf("%d %d %d\n",pri[0],pri[1],pri[2]);
+            }
             else
-                cout<<"second";
+                cout<<"second"<<endl;
         }
     }
 }
