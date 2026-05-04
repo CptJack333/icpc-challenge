@@ -72,7 +72,7 @@ int main(){
 //        n=176;
         auto isPrime= gen_prime(n);
 
-        if(n<84){
+        if(n<118){
             bool first_win = false;
             for (auto strategy = 2; strategy <= n; strategy += 2) {
                 vector<bool> used(n + 1, false);
