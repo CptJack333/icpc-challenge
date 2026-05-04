@@ -2,8 +2,6 @@
 
 using namespace std;
 
-vector<vector<int>> graph;
-
 vector<bool> gen_prime(int n){
     vector<bool> isPrime(n + 1, true);
     isPrime[0] = isPrime[1] = false;
@@ -16,23 +14,23 @@ vector<bool> gen_prime(int n){
             }
         }
     }
-
-    if(n<118)
-        for (int x = 1; x <= n; x++) {
-            for (int y = 1; y <  x; y++)
-                if (x%y == 0 && isPrime[x/y])
-                    graph[x].push_back(y);
-            for (int y = x; y <= n; y++)
-                if (y%x == 0 && isPrime[y/x])
-                    graph[x].push_back(y);
-        }
-
     return isPrime;
 }
 
 // round: 0 first 1 second
 bool dfs(int num, int n,int round, const vector<bool>& isPrime, vector<bool>& used){
-    vector<int> available_move=graph[num];
+    vector<int> available_move;
+
+    if(isPrime[num] && !used[1])
+        available_move.push_back(1);
+
+    for(int p=2;p*num<=n;++p){
+        if(isPrime[p] && !used[p*num])
+            available_move.push_back(p*num);
+    }
+    for(int p=2;p<num;++p)
+        if(isPrime[p] && num%p==0 && !used[num/p])
+            available_move.push_back(num/p);
 
     if(available_move.empty())
         return round==0;
@@ -40,8 +38,6 @@ bool dfs(int num, int n,int round, const vector<bool>& isPrime, vector<bool>& us
     if(round==0){
         bool all_opponent_move_can_be_handled = true;
         for (auto m: available_move) {
-            if(used[m])
-                continue;
             used[m] = true;
             auto b = dfs(m, n, (round + 1) % 2, isPrime, used);
             if (!b) {
@@ -56,8 +52,6 @@ bool dfs(int num, int n,int round, const vector<bool>& isPrime, vector<bool>& us
     }else{
 //        bool opponent_move_has_solution=false;
         for (auto m: available_move) {
-            if(used[m])
-                continue;
             used[m] = true;
             auto b = dfs(m, n, (round + 1) % 2, isPrime, used);
             used[m] = false;
@@ -75,10 +69,7 @@ int main(){
     for(int case_i=0;case_i<t;++case_i){
         int n;
         cin>>n;
-//        n=138;
-
-        graph.clear();
-        graph.resize(n+1);
+//        n=176;
         auto isPrime= gen_prime(n);
 
         if(n<118){
