@@ -17,16 +17,6 @@ vector<bool> gen_prime(int n){
         }
     }
 
-    if(n<118)
-        for (int x = 1; x <= n; x++) {
-            for (int y = 1; y <  x; y++)
-                if (x%y == 0 && isPrime[x/y])
-                    graph[x].push_back(y);
-            for (int y = x; y <= n; y++)
-                if (y%x == 0 && isPrime[y/x])
-                    graph[x].push_back(y);
-        }
-
     return isPrime;
 }
 
@@ -71,7 +61,7 @@ int main(){
 //    t=1;
     for(int case_i=0;case_i<t;++case_i){
         cin>>n;
-//        n=138;
+//        n=5;
 
         auto isPrime= gen_prime(n);
 
@@ -99,7 +89,7 @@ int main(){
                 if (match_num2 == match_num) break;
             }
             if (strategy<=n)
-                cout<<"first "<<strategy;
+                cout<<"first "<<strategy<<endl;
             else
                 cout << "second" << endl;
         }else{
